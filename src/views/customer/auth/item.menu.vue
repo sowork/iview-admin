@@ -11,7 +11,7 @@
             <div>
                 <Tabs value="0">
                     <TabPane :label="tree.name" :name="'' + index" v-for="(tree, index) in treeData">
-                        <Tree :data="tree.data" :render="renderContent" style="width:400px;" ></Tree>
+                        <Tree :data="tree.data" :render="renderContent" style="width:500px;" ></Tree>
                     </TabPane>
                 </Tabs>
             </div>
@@ -25,7 +25,7 @@
                     <Input type="text" v-model="formItem.item_code" placeholder=""></Input>
                 </FormItem>
                 <FormItem label="节点归属" prop="scope">
-                    <Select v-model="formItem.scope" multiple>
+                    <Select v-model="formItem.scope">
                         <Option v-for="item in itemScopes" :value="item.value" :key="item.value">{{ item.name }}</Option>
                     </Select>
                 </FormItem>
@@ -131,11 +131,10 @@
                             }, [
                                 h('Button', {
                                     props: Object.assign({}, this.buttonProps, {
-                                        icon: 'ios-plus-empty',
                                         type: 'primary'
                                     }),
                                     style: {
-                                        width: '52px'
+                                        width: '120px'
                                     },
                                     on: {
                                         click: () => {
@@ -143,7 +142,7 @@
                                             this.httpRequest.next();
                                         }
                                     }
-                                })
+                                }, '添加')
                             ])
                         ]);
                     }
@@ -187,10 +186,11 @@
                     this.checkAllGroup = permissions.data.data;
                 });
             },
-            destroy (index) {
-                this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/auth/destroy/role/' + this.formItem.id, this.formItem).then(response => {
-                    this.editInlineData.splice(index, 1);
+            destroy (data) {
+                this.axios.post('{{host_v1}}/auth/destroy/menu/' + data.id).then((response) => {
+                    if (response.data.code === '0') {
+                        this.initData();
+                    }
                 });
             },
             dblClick (row, index) {
@@ -230,9 +230,6 @@
                         }
                     }, [
                         h('Button', {
-                            props: Object.assign({}, this.buttonProps, {
-                                icon: 'ios-plus-empty'
-                            }),
                             style: {
                                 marginRight: '8px'
                             },
@@ -242,7 +239,7 @@
                                     this.httpRequest.next();
                                 }
                             }
-                        }),
+                        }, '添加'),
                         h('Poptip', {
                             props: {
                                 confirm: true,
@@ -251,19 +248,11 @@
                             },
                             on: {
                                 'on-ok': () => {
-                                    this.axios.post('{{host_v1}}/auth/destroy/menu/' + data.id).then((response) => {
-                                        if (response.data.code === '0') {
-                                            this.initData();
-                                        }
-                                    });
+                                    this.destroy(data);
                                 }
                             }
                         }, [
-                            h('Button', {
-                                props: Object.assign({}, this.buttonProps, {
-                                    icon: 'ios-minus-empty'
-                                })
-                            })
+                            h('Button', '删除')
                         ])
                     ])
                 ]);
