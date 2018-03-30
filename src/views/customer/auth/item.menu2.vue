@@ -9,8 +9,8 @@
                 菜单管理
             </p>
             <div>
-                <Tabs ref="treeGroups" @on-click="loadMenu" style="height: 500px;">
-                    <TabPane :label="tree.name" :name="tree.scope" v-for="(tree, index) in treeData">
+                <Tabs value="0">
+                    <TabPane :label="tree.name" :name="'' + index" v-for="(tree, index) in treeData">
                         <Tree :data="tree.data" :render="renderContent" style="width:500px;" ></Tree>
                     </TabPane>
                 </Tabs>
@@ -85,41 +85,22 @@
                     item_desc: [
                         { type: 'string', max: 191, message: '字符串最多为191', trigger: 'blur' }
                     ]
-                },
-                columns: [
-                    {
-                        title: '菜单名称',
-                        key: 'item_name'
-                    },
-                    {
-                        title: '菜单描述',
-                        key: 'item_desc'
-                    }
-                ],
-                dataItems: [],
-                initDataItems: []
+                }
             };
         },
         methods: {
             initData () {
                 Promise.all([
-                    this.axios.get('{{host_v1}}/auth/menu/show/tree', {
-                        params: {
-                            type: 2
-                        }
-                    })
+                    this.axios.get('{{host_v1}}/auth/index/menu')
                 ]).then(([trees]) => {
-                    let scope = '';
                     if (trees.data.data.length > 0) {
                         for (let tree of trees.data.data) {
                             tree.data.unshift(this.topMenu());
                         }
                         this.treeData = trees.data.data;
-                        scope = trees.data.data[0].scope;
                     } else {
                         this.treeData = [{data: [this.topMenu()], name: '初始化菜单'}];
                     }
-                    this.$refs.treeGroups.$emit('on-click', scope);
                 });
             },
             topMenu () {
@@ -152,27 +133,20 @@
                                     marginRight: '32px'
                                 }
                             }, [
-                                h('PopTipTable', {
-                                    props: {
-                                        data: this.dataItems,
-                                        columns: this.columns,
-                                        selectNode: data
+                                h('Button', {
+                                    props: Object.assign({}, this.buttonProps, {
+                                        type: 'primary'
+                                    }),
+                                    style: {
+                                        width: '120px'
                                     },
                                     on: {
-                                        search: this.search,
-                                        dbClick: this.dbClick
-                                    }
-                                }, [
-                                    h('Button', {
-                                        props: Object.assign({}, this.buttonProps, {
-                                            icon: 'ios-plus-empty',
-                                            type: 'primary'
-                                        }),
-                                        style: {
-                                            width: '120px'
+                                        click: () => {
+                                            this.httpRequest = this.actionModal('formItem', 'store', data);
+                                            this.httpRequest.next();
                                         }
-                                    })
-                                ])
+                                    }
+                                }, '添加')
                             ])
                         ]);
                     }
@@ -223,37 +197,10 @@
                     }
                 });
             },
-            search (searchContent) {
-                let res = [];
-                let dataClone = JSON.parse(JSON.stringify(this.initDataItems));
-                if (searchContent === '') {
-                    res = dataClone;
-                } else {
-                    let argumentObj = {item_name: searchContent, item_desc: searchContent};
-                    for (let argu in argumentObj) {
-                        if (argumentObj[argu].length > 0) {
-                            for (let key in dataClone) {
-                                if (dataClone[key][argu].indexOf(argumentObj[argu]) > -1) {
-                                    res.push(dataClone[key]);
-                                    dataClone.splice(key, 1);
-                                }
-                            }
-                        }
-                    }
-                }
-                this.dataItems = res;
-            },
-            dbClick (row, index, parentRow) {
-                this.axios.post('{{host_v1}}/auth/item/store/relation/' + parentRow.id, {
-                    id: row.id,
-                    pitem_id: parentRow.id
-                }).then((response) => {
-                    if (response.data.code === '0') {
-                        const children = parentRow.children || [];
-                        children.push(response.data.data);
-                        this.$set(parentRow, 'children', children);
-                    }
-                });
+            dblClick (row, index) {
+                this.formItem = row;
+                this.httpRequest = this.actionModal('formItem', 'update', index);
+                this.httpRequest.next();
             },
             renderContent (h, { root, node, data }) {
                 let style = '';
@@ -313,15 +260,6 @@
                         ])
                     ])
                 ]);
-            },
-            loadMenu (name) {
-                this.axios.get('{{host_v1}}/auth/menu/show/list', {
-                    params: {
-                        scope: name
-                    }
-                }).then(menus => {
-                    this.dataItems = this.initDataItems = menus.data.data;
-                });
             }
         },
         created () {
