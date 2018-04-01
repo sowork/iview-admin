@@ -103,7 +103,7 @@
         methods: {
             initData () {
                 Promise.all([
-                    this.axios.get('{{host_v1}}/auth/menu/show/tree', {
+                    this.axios.get('{{host_v1}}/auth/item/show/tree', {
                         params: {
                             type: 2
                         }
@@ -112,14 +112,17 @@
                     let scope = '';
                     if (trees.data.data.length > 0) {
                         for (let tree of trees.data.data) {
-                            tree.data.unshift(this.topMenu());
+                            let menu = this.topMenu();
+                            menu.children = JSON.parse(JSON.stringify(tree.data));
+                            tree.data = [menu];
                         }
                         this.treeData = trees.data.data;
+                        console.log(this.treeData)
                         scope = trees.data.data[0].scope;
+                        this.$refs.treeGroups.$emit('on-click', scope);
                     } else {
                         this.treeData = [{data: [this.topMenu()], name: '初始化菜单'}];
                     }
-                    this.$refs.treeGroups.$emit('on-click', scope);
                 });
             },
             topMenu () {
@@ -246,7 +249,6 @@
             dbClick (row, index, parentRow) {
                 this.axios.post('{{host_v1}}/auth/item/store/relation/' + parentRow.id, {
                     id: row.id,
-                    pitem_id: parentRow.id
                 }).then((response) => {
                     if (response.data.code === '0') {
                         const children = parentRow.children || [];
@@ -277,7 +279,7 @@
                                 marginRight: '8px'
                             }
                         }),
-                        h('span', data.items.item_name)
+                        h('span', data.item.item_name)
                     ]),
                     h('span', {
                         style: {
@@ -286,17 +288,23 @@
                             marginRight: '32px'
                         }
                     }, [
-                        h('Button', {
-                            style: {
-                                marginRight: '8px'
+                        h('PopTipTable', {
+                            props: {
+                                data: this.dataItems,
+                                columns: this.columns,
+                                selectNode: data
                             },
                             on: {
-                                'click': () => {
-                                    this.httpRequest = this.actionModal('formItem', 'store', data);
-                                    this.httpRequest.next();
-                                }
+                                search: this.search,
+                                dbClick: this.dbClick
                             }
-                        }, '添加'),
+                        }, [
+                            h('Button', {
+                                style: {
+                                    marginRight: '8px'
+                                }
+                            }, '添加')
+                        ]),
                         h('Poptip', {
                             props: {
                                 confirm: true,
