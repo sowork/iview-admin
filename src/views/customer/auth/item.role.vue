@@ -9,13 +9,9 @@
                 菜单管理
             </p>
             <div>
-                <Tabs ref="itemTypes" @on-click="loadItemRelation" style="height: 700px;">
-                    <TabPane :label="type.name" :name="'' + type.value" v-for="(type, index) in itemTypes">
-                        <Tabs ref="treeGroups" @on-click="loadItems" style="height: 700px;">
-                            <TabPane :label="scope.name" :name="JSON.stringify({scope: scope.value, type: type.value})" v-for="(scope, index) in type.scopes">
-                                <Tree :data="tree.data" :render="renderContent" style="width:500px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value"></Tree>
-                            </TabPane>
-                        </Tabs>
+                <Tabs ref="treeGroups" @on-click="loadMenu" style="height: 700px;">
+                    <TabPane :label="scope.name" :name="scope.value" v-for="(scope, index) in itemScopes">
+                        <Tree :data="tree.data" :render="renderContent" style="width:500px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value || tree.data[0].id === 0"></Tree>
                     </TabPane>
                 </Tabs>
             </div>
@@ -39,50 +35,15 @@
             return {
                 treeData: [],
                 currentScope: '',
-                currentType: '',
                 scopes: [],
-                itemTypes: [
+                itemScopes: [
                     {
-                        value: 3,
-                        name: '角色',
-                        scopes: [
-                            {
-                                value: 'admin',
-                                name: '后台角色'
-                            },
-                            {
-                                value: 'user',
-                                name: '前台角色'
-                            }
-                        ]
+                        value: 'admin',
+                        name: '后台菜单'
                     },
                     {
-                        value: 2,
-                        name: '菜单',
-                        scopes: [
-                            {
-                                value: 'admin',
-                                name: '后台菜单'
-                            },
-                            {
-                                value: 'user',
-                                name: '前台菜单'
-                            }
-                        ]
-                    },
-                    {
-                        value: 1,
-                        name: '权限',
-                        scopes: [
-                            {
-                                value: 'admin',
-                                name: '后台权限'
-                            },
-                            {
-                                value: 'user',
-                                name: '前台权限'
-                            }
-                        ]
+                        value: 'user',
+                        name: '前台菜单'
                     }
                 ],
                 columns: [
@@ -103,55 +64,52 @@
                     width: '250px',
                     height: '300px'
                 },
-                operations: ['To left', 'To right']
+                operations: ['To left', 'To right'],
+                itemTypes: [
+                    {
+                        value: 1,
+                        name: '权限',
+                        level: 1
+                    },
+                    {
+                        value: 2,
+                        name: '菜单',
+                        level: 2
+                    },
+                    {
+                        value: 3,
+                        name: '角色',
+                        level: 3
+                    }
+                ]
             };
         },
         methods: {
-            initData (type) {
-                if (type === undefined) {
-                    type = this.itemTypes[0]['value'];
-                }
+            initData () {
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/relation/tree', {
                         params: {
-                            type: type
+                            type: 2
                         }
                     })
                 ]).then(([trees]) => {
-                    let defaultRootItems = [];
-                    /* 加载选择节点 */
-                    for (let [index, typeItem] of this.itemTypes.entries()) {
-                        if (typeItem.value === Number.parseInt(type)) {
-                            for (let scope of typeItem.scopes) {
-                                let menu = this.topMenu();
-                                for (let tree of trees.data.data) {
-                                    if (scope.value === tree.scope) {
-                                        menu.children = tree.data;
-                                    }
-                                }
-                                defaultRootItems[scope.value] = {
-                                    data: [
-                                        menu
-                                    ],
-                                    scope: scope.value
-                                };
-                            }
+                    if (trees.data.data.length > 0) {
+                        for (let tree of trees.data.data) {
+                            let menu = this.topMenu();
+                            menu.children = JSON.parse(JSON.stringify(tree.data));
+                            tree.data = [menu];
                         }
-
-                        if (Number.parseInt(type) === typeItem.value) {
-                            this.$refs.treeGroups[index].$emit('on-click', {
-                                scope: this.itemTypes[index]['scopes'][0].value,
-                                type: type
-                            });
-                        }
+                        this.treeData = trees.data.data;
+                    } else {
+                        this.treeData = [{data: [this.topMenu()], name: '初始化菜单'}];
                     }
-
-                    this.treeData = Object.values(defaultRootItems);
+                    console.log(this.treeData)
+                    this.$refs.treeGroups.$emit('on-click', this.itemScopes[0].value);
                 });
             },
             topMenu () {
                 return {
-                    title: '添加顶级节点',
+                    title: '添加顶级菜单',
                     id: 0,
                     expand: true,
                     render: (h, {root, node, data}) => {
@@ -187,10 +145,7 @@
                                     },
                                     on: {
                                         search: this.search,
-                                        dbClick: this.store,
-                                        'on-popper-show': () => {
-                                            this.getItemOriginal(data);
-                                        }
+                                        dbClick: this.store
                                     }
                                 }, [
                                     h('Button', {
@@ -288,10 +243,7 @@
                             },
                             on: {
                                 search: this.search,
-                                dbClick: this.store,
-                                'on-popper-show': () => {
-                                    this.getItemOriginal(data);
-                                }
+                                dbClick: this.store
                             }
                         }, [
                             h('Button', {
@@ -328,58 +280,43 @@
                             },
                             on: {
                                 onPopperShow: () => {
-                                    this.loadGroupItems(data);
+                                    this.getPermissions(data);
                                 },
                                 handleChange: (event) => {
                                     this.handleChange(event, data);
                                 },
                                 showAllData: () => {
-                                    this.loadGroupItems(data, 0);
+                                    this.getPermissions(data, 0);
                                 }
                             }
                         }, [
-                            h('Button', '分配')
+                            h('Button', '权限')
                         ])
                     ])
                 ]);
             },
-            loadItems (obj) {
-                if (!(obj instanceof Object)) {
-                    obj = JSON.parse(obj);
-                }
-                this.currentScope = obj.scope;
-                this.currentType = obj.type;
-            },
-            getItemOriginal (data, filter = 1) {
-                this.dataItems = this.initDataItems = [];
-                this.axios.get('{{host_v1}}/auth/item/relation/original', {
+            loadMenu (name) {
+                this.currentScope = name;
+                this.axios.get('{{host_v1}}/auth/menu/show/list', {
                     params: {
-                        scope: this.currentScope,
-                        type: this.currentType,
-                        id: data.id,
-                        filter: filter
+                        scope: name
                     }
                 }).then(menus => {
                     this.dataItems = this.initDataItems = menus.data.data;
                 });
             },
-            loadGroupItems (data, filter = 1) {
+            getPermissions (data, filter = 1) {
                 this.groupData = [];
                 this.targetItems = [];
                 Promise.all([
-                    this.axios.get('{{host_v1}}/auth/item/group/original', {
+                    this.axios.get('{{host_v1}}/auth/item/group/original/' + data.item.id, {
                         params: {
-                            id: data.item.id,
-                            type: this.currentType,
+                            types: 1,
                             filter: filter,
                             scope: this.currentScope
                         }
                     }),
-                    this.axios.get('{{host_v1}}/auth/item/group/target', {
-                        params: {
-                            id: data.item.id
-                        }
-                    })
+                    this.axios.get('{{host_v1}}/auth/item/group/target/' + data.item.id)
                 ]).then(([items, targetItems]) => {
                     if (items.data.data.length > 0) {
                         for (let item of items.data.data) {
@@ -395,17 +332,13 @@
                 return item.item_name + ' - ' + item.item_desc;
             },
             handleChange (targetData, data) {
-                this.axios.post('{{host_v1}}/auth/item/group/' + data.item.id, {
-                    ids: targetData,
-                    scope: this.currentScope
+                this.axios.post('{{host_v1}}/auth/item/add/group/' + data.item.id, {
+                    ids: targetData
                 }).then(response => {
                     if (response.data.code === '0') {
                         this.targetItems = targetData;
                     }
                 });
-            },
-            loadItemRelation (type) {
-                this.initData(type);
             }
         },
         created () {

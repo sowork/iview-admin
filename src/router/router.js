@@ -94,6 +94,7 @@ export const appRouter = [
         children: [
             { path: 'auth/items', title: '节点列表', name: 'item.index', component: () => import('@/views/customer/auth/item.index.vue') },
             { path: 'auth/menus', title: '菜单列表', name: 'item.menu', component: () => import('@/views/customer/auth/item.menu.vue') },
+            { path: 'auth/roles', title: '角色列表', name: 'item.role', component: () => import('@/views/customer/auth/item.role.vue') },
         ]
     },
     {

@@ -1,5 +1,5 @@
 <template>
-    <Poptip placement="bottom" width="400">
+    <Poptip placement="bottom" width="400" @on-popper-show="onPopperShow">
         <div slot="content">
             <Row :gutter="10">
                 <Col span="24">
@@ -38,6 +38,9 @@
             },
             handleDbClick (row, index) {
                 this.$emit('dbClick', row, index, this.selectNode);
+            },
+            onPopperShow () {
+                this.$emit('on-popper-show');
             }
         }
     };

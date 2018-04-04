@@ -23,14 +23,14 @@
                 <FormItem label="节点名称" prop="item_name">
                     <Input type="text" v-model="formItem.item_name" placeholder=""></Input>
                 </FormItem>
-                <FormItem label="节点归属" prop="scope">
-                    <Select v-model="formItem.scope" multiple>
-                        <Option v-for="item in itemScopes" :value="item.value" :key="item.value">{{ item.name }}</Option>
-                    </Select>
-                </FormItem>
                 <FormItem label="节点类型" prop="item_type">
                     <Select v-model="formItem.item_type">
                         <Option v-for="item in itemTypes" :value="item.value" :key="item.value">{{ item.name }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="节点归属" prop="scope">
+                    <Select v-model="formItem.scope" multiple>
+                        <Option v-for="item in getItemScopes()" :value="item.value" :key="item.value + item.name">{{ item.name }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="节点描述" prop="item_desc">
@@ -52,26 +52,46 @@
                 httpRequest: '',
                 itemTypes: [
                     {
-                        value: 1,
-                        name: '权限'
+                        value: 3,
+                        name: '角色',
+                        scopes: [
+                            {
+                                value: 'admin',
+                                name: '后台角色'
+                            },
+                            {
+                                value: 'user',
+                                name: '前台角色'
+                            }
+                        ]
                     },
                     {
                         value: 2,
-                        name: '菜单'
+                        name: '菜单',
+                        scopes: [
+                            {
+                                value: 'admin',
+                                name: '后台菜单'
+                            },
+                            {
+                                value: 'user',
+                                name: '前台菜单'
+                            }
+                        ]
                     },
                     {
-                        value: 3,
-                        name: '角色'
-                    }
-                ],
-                itemScopes: [
-                    {
-                        value: 'admin',
-                        name: '管理员权限'
-                    },
-                    {
-                        value: 'user',
-                        name: '学校权限'
+                        value: 1,
+                        name: '权限',
+                        scopes: [
+                            {
+                                value: 'admin',
+                                name: '后台权限'
+                            },
+                            {
+                                value: 'user',
+                                name: '前台权限'
+                            }
+                        ]
                     }
                 ],
                 editInlineColumns: [
@@ -95,10 +115,14 @@
                         align: 'center',
                         render: (h, params) => {
                             let scopeStr = [];
-                            for (let item of this.itemScopes) {
-                                for (let scope of params.row.scope.split(',')) {
-                                    if (item.value === scope) {
-                                        scopeStr.push(item.name);
+                            for (let item of this.itemTypes) {
+                                if (item.value === params.row.item_type) { // 类型对应
+                                    for (let itemScope of item.scopes) {
+                                        for (let scope of params.row.scope.split(',')) {
+                                            if (itemScope.value === scope) {
+                                                scopeStr.push(itemScope.name);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -272,6 +296,13 @@
                 this.formItem = row;
                 this.httpRequest = this.actionModal('formItem', 'update', index);
                 this.httpRequest.next();
+            },
+            getItemScopes () {
+                for (let item of this.itemTypes) {
+                    if (item.value === this.formItem.item_type) {
+                        return item.scopes;
+                    }
+                }
             }
         },
         created () {
