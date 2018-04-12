@@ -37,7 +37,7 @@ const app = {
         setTagsList (state, list) {
             state.tagsList.push(...list);
         },
-        updateMenulist (state) {
+        updateMenulist (state, appRouter = []) {
             let accessCode = JSON.parse(Cookies.get('access') ? Cookies.get('access') : 0);
             let menuList = [];
             appRouter.forEach((item, index) => {
@@ -87,6 +87,7 @@ const app = {
                     }
                 }
             });
+            console.log(menuList);
             state.menuList = menuList;
         },
         changeMenuTheme (state, theme) {

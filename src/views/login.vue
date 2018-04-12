@@ -45,6 +45,7 @@
 <script>
 import { mapState } from 'vuex';
 import Cookies from 'js-cookie';
+
 export default {
     data () {
         return {
@@ -79,14 +80,24 @@ export default {
                     }).then((response) => {
                         if (response.data.access_token) {
                             Cookies.set('user', this.form.userName);
-//                            return this.axios.get('{{host_v1}}/user/permissions');
+                            return this.axios.get('{{host_v1}}/auth/items', {
+                                params: {
+                                    'scope': 'admin',
+                                    'type': 2
+                                }
+                            });
                         }
                     }).then((response) => {
-//                        Cookies.set('access', response.data.data);
+                        let menus = this.parseMenuTree(response.data.data);
+                        console.log(menus)
+                        localStorage.menuList = JSON.stringify(menus);
+//                        this.$router.addRoutes(menus);
+//                        this.$store.commit('updateMenulist', menus);
+
                         Cookies.set('access', []);
-                        this.$router.push({
-                            name: 'home_index'
-                        });
+//                        this.$router.push({
+//                            name: 'home_index'
+//                        });
                     });
 //                    Cookies.set('user', this.form.userName);
 //                    Cookies.set('password', this.form.password);
@@ -101,6 +112,35 @@ export default {
 //                    });
                 }
             });
+        },
+        parseMenuTree (treeData) {
+            let tree = [];
+            let temp = {tree: {}};
+            for (let item of treeData) {
+                let data = JSON.parse(item.other_data);
+                temp['tree'][item.relation_id] = {
+                    path: data.path,
+                    icon: data.icon,
+                    component: () => import(data.component),
+                    title: item.item_name,
+                    parent_id: item.parent_id,
+                    relation_id: item.relation_id,
+                    name: item.item_code
+                };
+            }
+
+            for (let index in temp['tree']) {
+                if (temp['tree'][index].parent_id !== null && temp['tree'][temp['tree'][index]['parent_id']] !== undefined) {
+                    if (temp['tree'][temp['tree'][index]['parent_id']].children === undefined) {
+                        temp['tree'][temp['tree'][index]['parent_id']].children = [];
+                    }
+                    temp['tree'][temp['tree'][index]['parent_id']].children.push(temp['tree'][index]);
+                } else {
+                    tree.push(temp['tree'][index])
+                }
+            }
+
+            return tree;
         }
     },
     computed: {

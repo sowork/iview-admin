@@ -1,12 +1,15 @@
 <template>
-    <Poptip placement="bottom" width="660" @on-popper-show="onPopperShow" transfer>
+    <Poptip :placement="placement" width="660" @on-popper-show="onPopperShow" transfer>
         <div slot="content">
             <Row :gutter="10">
                 <Col span="24">
                     <Card>
                         <div style="padding-bottom: 15px">
-                            <Button type="ghost" size="small" @click="showAllData">LoadFilter</Button>
-                            <Button type="ghost" size="small" @click="showAllData">LoadAll</Button>
+                            <Button type="ghost" @click="showFilterData">LoadFilter</Button>
+                            <Button type="ghost" @click="showAllData">LoadAll</Button>
+                            <Select style="width:200px" :value="valueCopy" @on-change="selectChange">
+                                <Option v-for="item in items" :value="item.value" :key="item.value">{{ item.name }}</Option>
+                            </Select>
                         </div>
                         <Transfer
                                 :data="groupData"
@@ -16,9 +19,6 @@
                                 :operations="operations"
                                 filterable
                                 @on-change="handleChange">
-                            <div :style="{float: 'right', margin: '5px'}">
-                                <Button type="ghost" size="small" @click="showAllData">LoadAll</Button>
-                            </div>
                         </Transfer>
                     </Card>
                 </Col>
@@ -36,6 +36,24 @@
             targetItems: Array,
             listStyle: Object,
             operations: Array,
+            placement: {
+                type: String,
+                default () {
+                    return 'bottom';
+                }
+            },
+            value: {
+                type: Number,
+                default () {
+                    return 0;
+                }
+            },
+            items: {
+                type: Array,
+                default () {
+                    return [];
+                }
+            },
             renderItem: {
                 type: Function,
                 default (item) {
@@ -45,8 +63,7 @@
         },
         data () {
             return {
-                searchContent: '',
-                initData: []
+                valueCopy: this.value
             };
         },
         methods: {
@@ -54,10 +71,16 @@
                 this.$emit('handleChange', targetData);
             },
             onPopperShow () {
-                this.$emit('onPopperShow');
+                this.$emit('onPopperShow', this.value);
             },
             showAllData () {
-                this.$emit('showAllData');
+                this.$emit('showAllData', this.value);
+            },
+            selectChange (value) {
+                this.$emit('selectChange', value);
+            },
+            showFilterData () {
+                this.$emit('showFilterData', this.value);
             }
         }
     };

@@ -40,11 +40,11 @@
                 treeData: [],
                 currentScope: '',
                 currentType: '',
-                scopes: [],
                 itemTypes: [
                     {
                         value: 3,
                         name: '角色',
+                        level: 3,
                         scopes: [
                             {
                                 value: 'admin',
@@ -59,6 +59,7 @@
                     {
                         value: 2,
                         name: '菜单',
+                        level: 2,
                         scopes: [
                             {
                                 value: 'admin',
@@ -73,6 +74,7 @@
                     {
                         value: 1,
                         name: '权限',
+                        level: 1,
                         scopes: [
                             {
                                 value: 'admin',
@@ -99,6 +101,8 @@
                 initDataItems: [],
                 groupData: [],
                 targetItems: [],
+                selectItems: [],
+                returnType: 0,
                 listStyle: {
                     width: '250px',
                     height: '300px'
@@ -111,6 +115,9 @@
                 if (type === undefined) {
                     type = this.itemTypes[0]['value'];
                 }
+                this.treeData = [];
+                this.selectItems = [];
+                this.currentItem = {};
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/relation/tree', {
                         params: {
@@ -121,6 +128,10 @@
                     let defaultRootItems = [];
                     /* 加载选择节点 */
                     for (let [index, typeItem] of this.itemTypes.entries()) {
+                        if (typeItem.value === type) {
+                            this.currentItem = typeItem;
+                            this.returnType = this.currentItem.value - 1 > 0 ? this.currentItem.value - 1 : 1;
+                        }
                         if (typeItem.value === Number.parseInt(type)) {
                             for (let scope of typeItem.scopes) {
                                 let menu = this.topMenu();
@@ -142,6 +153,15 @@
                             this.$refs.treeGroups[index].$emit('on-click', {
                                 scope: this.itemTypes[index]['scopes'][0].value,
                                 type: type
+                            });
+                        }
+                    }
+
+                    for (let item of this.itemTypes) {
+                        if (item.level <= this.currentItem.level) {
+                            this.selectItems.push({
+                                name: item.name,
+                                value: item.value
                             });
                         }
                     }
@@ -324,17 +344,26 @@
                                 targetItems: this.targetItems,
                                 listStyle: this.listStyle,
                                 operations: this.operations,
-                                renderItem: this.renderItem
+                                renderItem: this.renderItem,
+                                items: this.selectItems,
+                                value: this.returnType
                             },
                             on: {
-                                onPopperShow: () => {
-                                    this.loadGroupItems(data);
+                                onPopperShow: (value) => {
+                                    this.loadGroupItems(value, data);
                                 },
                                 handleChange: (event) => {
                                     this.handleChange(event, data);
                                 },
-                                showAllData: () => {
-                                    this.loadGroupItems(data, 0);
+                                showAllData: (value) => {
+                                    this.loadGroupItems(value, data, 0);
+                                },
+                                showFilterData: (value) => {
+                                    this.loadGroupItems(value, data, 1);
+                                },
+                                selectChange: (value) => {
+                                    this.loadGroupItems(value, data);
+                                    this.returnType = value;
                                 }
                             }
                         }, [
@@ -363,7 +392,7 @@
                     this.dataItems = this.initDataItems = menus.data.data;
                 });
             },
-            loadGroupItems (data, filter = 1) {
+            loadGroupItems (value, data, filter = 1) {
                 this.groupData = [];
                 this.targetItems = [];
                 Promise.all([
@@ -372,7 +401,8 @@
                             id: data.item.id,
                             type: this.currentType,
                             filter: filter,
-                            scope: this.currentScope
+                            scope: this.currentScope,
+                            returnType: value
                         }
                     }),
                     this.axios.get('{{host_v1}}/auth/item/group/target', {
@@ -405,7 +435,7 @@
                 });
             },
             loadItemRelation (type) {
-                this.initData(type);
+                this.initData(Number.parseInt(type));
             }
         },
         created () {

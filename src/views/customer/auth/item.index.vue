@@ -33,6 +33,9 @@
                         <Option v-for="item in getItemScopes()" :value="item.value" :key="item.value + item.name">{{ item.name }}</Option>
                     </Select>
                 </FormItem>
+                <FormItem label="额外数据" prop="other_data">
+                    <Input type="textarea" v-model="formItem.other_data" placeholder=""></Input>
+                </FormItem>
                 <FormItem label="节点描述" prop="item_desc">
                     <Input type="text" v-model="formItem.item_desc" placeholder=""></Input>
                 </FormItem>
@@ -179,20 +182,6 @@
                                     },
                                     on: {
                                         click: () => {
-                                            this.$router.push({
-                                                name: 'item.relation',
-                                                query: {data: JSON.stringify(params.row)}
-                                            });
-                                        }
-                                    }
-                                }, '节点关联'),
-                                h('Button', {
-                                    props: {
-                                        type: 'text',
-                                        size: 'small'
-                                    },
-                                    on: {
-                                        click: () => {
                                             this.dblClick(JSON.parse(JSON.stringify(this.editInlineData[params.index])), params.index);
                                         }
                                     }
@@ -227,7 +216,8 @@
                     item_name: '',
                     item_desc: '',
                     item_type: '',
-                    scope: []
+                    scope: [],
+                    other_data: ''
                 },
                 ruleInline: {
                     item_code: [

@@ -103,7 +103,6 @@
                     } else {
                         this.treeData = [{data: [this.topMenu()], name: '初始化菜单'}];
                     }
-                    console.log(this.treeData)
                     this.$refs.treeGroups.$emit('on-click', this.itemScopes[0].value);
                 });
             },
