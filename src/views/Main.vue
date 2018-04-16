@@ -123,7 +123,7 @@
         methods: {
             init () {
                 let pathArr = util.setCurrentPath(this, this.$route.name);
-                this.$store.commit('updateMenulist', JSON.parse(localStorage.menuList));
+                this.$store.dispatch('filterMenus', {treeData: JSON.parse(localStorage.menuList || null), vm: this});
                 if (pathArr.length >= 2) {
                     this.$store.commit('addOpenSubmenu', pathArr[1].name);
                 }

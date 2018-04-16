@@ -1,6 +1,7 @@
 import axios from 'axios';
 import semver from 'semver';
 import packjson from '../../package.json';
+import { routerList } from "../router/router.component";
 
 let util = {
 
@@ -245,7 +246,7 @@ util.toDefaultPage = function (routers, name, route, next) {
 util.fullscreenEvent = function (vm) {
     vm.$store.commit('initCachepage');
     // 权限菜单过滤相关
-    vm.$store.commit('updateMenulist');
+    vm.$store.dispatch('filterMenus', {treeData: JSON.parse(localStorage.menuList || null), vm: vm});
     // 全屏相关
 };
 
@@ -262,6 +263,39 @@ util.checkUpdate = function (vm) {
             });
         }
     });
+};
+
+util.parseMenuTree = function (menus) {
+    if (!menus) {
+        return [];
+    }
+    let tree = [];
+    let temp = {tree: {}};
+    for (let item of menus) {
+        let data = JSON.parse(item.other_data);
+        temp['tree'][item.relation_id] = {
+            path: data.path,
+            icon: data.icon,
+            component: () => import(routerList[item.item_code]),
+            title: item.item_name,
+            parent_id: item.parent_id,
+            relation_id: item.relation_id,
+            name: item.item_code
+        };
+    }
+
+    for (let index in temp['tree']) {
+        if (temp['tree'][index].parent_id !== null && temp['tree'][temp['tree'][index]['parent_id']] !== undefined) {
+            if (temp['tree'][temp['tree'][index]['parent_id']].children === undefined) {
+                temp['tree'][temp['tree'][index]['parent_id']].children = [];
+            }
+            temp['tree'][temp['tree'][index]['parent_id']].children.push(temp['tree'][index]);
+        } else {
+            tree.push(temp['tree'][index]);
+        }
+    }
+
+    return tree;
 };
 
 export default util;

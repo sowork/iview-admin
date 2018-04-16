@@ -193,6 +193,14 @@ const app = {
             state.pageOpenedList.push(tagObj);
             localStorage.pageOpenedList = JSON.stringify(state.pageOpenedList);
         }
+    },
+    actions: {
+        filterMenus ({ commit }, obj) {
+            const menus = Util.parseMenuTree(obj.treeData);
+            obj.vm.$router.addRoutes(menus);
+            console.log(menus)
+            commit('updateMenulist', menus);
+        }
     }
 };
 

@@ -45,7 +45,7 @@
 <script>
 import { mapState } from 'vuex';
 import Cookies from 'js-cookie';
-import { routers } from '../router/router.component';
+import { appRouter } from '../router/router';
 
 export default {
     data () {
@@ -89,12 +89,7 @@ export default {
                             });
                         }
                     }).then((response) => {
-                        let menus = this.parseMenuTree(response.data.data);
-                        console.log(menus)
-                        localStorage.menuList = JSON.stringify(menus);
-                        this.$store.commit('updateMenulist', menus);
-                        this.$router.addRoutes(menus);
-
+                        localStorage.menuList = JSON.stringify(response.data.data);
                         Cookies.set('access', []);
                         this.$router.push({
                             name: 'home_index'
@@ -113,35 +108,6 @@ export default {
 //                    });
                 }
             });
-        },
-        parseMenuTree (treeData) {
-            let tree = [];
-            let temp = {tree: {}};
-            for (let item of treeData) {
-                let data = JSON.parse(item.other_data);
-                temp['tree'][item.relation_id] = {
-                    path: data.path,
-                    icon: data.icon,
-                    component: () => import(data.component),
-                    title: item.item_name,
-                    parent_id: item.parent_id,
-                    relation_id: item.relation_id,
-                    name: item.item_code
-                };
-            }
-
-            for (let index in temp['tree']) {
-                if (temp['tree'][index].parent_id !== null && temp['tree'][temp['tree'][index]['parent_id']] !== undefined) {
-                    if (temp['tree'][temp['tree'][index]['parent_id']].children === undefined) {
-                        temp['tree'][temp['tree'][index]['parent_id']].children = [];
-                    }
-                    temp['tree'][temp['tree'][index]['parent_id']].children.push(temp['tree'][index]);
-                } else {
-                    tree.push(temp['tree'][index]);
-                }
-            }
-
-            return tree;
         }
     },
     computed: {

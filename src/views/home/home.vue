@@ -2,7 +2,7 @@
     @import "./home.less";
     @import "../../styles/common.less";
 </style>
-<!--<template>-->
+<template>
     <!--<div class="home-main">-->
         <!--<Row :gutter="10">-->
             <!--<Col :md="24" :lg="8">-->
@@ -173,7 +173,7 @@
             <!--</Card>-->
         <!--</Row>-->
     <!--</div>-->
-<!--</template>-->
+</template>
 
 <script>
 import cityData from './map-data/get-city-value.js';

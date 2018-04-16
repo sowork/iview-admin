@@ -71,9 +71,6 @@ export const otherRouter = {
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export const appRouter = [
-    // 'auth.manage': () => import('@/views/Main.vue'),
-    // 'permission.list': () => import('@/views/customer/auth/item.index.vue'),
-    // 'permission.': () => import('@/views/customer/auth/item.relation.group.vue'),
 
     // {
     //     path: '/manage',
