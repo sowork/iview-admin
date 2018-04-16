@@ -95,9 +95,9 @@ export default {
 //                        this.$store.commit('updateMenulist', menus);
 
                         Cookies.set('access', []);
-//                        this.$router.push({
-//                            name: 'home_index'
-//                        });
+                       // this.$router.push({
+                       //     name: 'home_index'
+                       // });
                     });
 //                    Cookies.set('user', this.form.userName);
 //                    Cookies.set('password', this.form.password);
