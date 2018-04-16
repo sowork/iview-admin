@@ -45,6 +45,7 @@
 <script>
 import { mapState } from 'vuex';
 import Cookies from 'js-cookie';
+import { routers } from '../router/router.component';
 
 export default {
     data () {
@@ -91,13 +92,13 @@ export default {
                         let menus = this.parseMenuTree(response.data.data);
                         console.log(menus)
                         localStorage.menuList = JSON.stringify(menus);
-//                        this.$router.addRoutes(menus);
-//                        this.$store.commit('updateMenulist', menus);
+                        this.$store.commit('updateMenulist', menus);
+                        this.$router.addRoutes(menus);
 
                         Cookies.set('access', []);
-                       // this.$router.push({
-                       //     name: 'home_index'
-                       // });
+                        this.$router.push({
+                            name: 'home_index'
+                        });
                     });
 //                    Cookies.set('user', this.form.userName);
 //                    Cookies.set('password', this.form.password);
@@ -136,7 +137,7 @@ export default {
                     }
                     temp['tree'][temp['tree'][index]['parent_id']].children.push(temp['tree'][index]);
                 } else {
-                    tree.push(temp['tree'][index])
+                    tree.push(temp['tree'][index]);
                 }
             }
 

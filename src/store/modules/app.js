@@ -37,13 +37,13 @@ const app = {
         setTagsList (state, list) {
             state.tagsList.push(...list);
         },
-        updateMenulist (state, appRouter = []) {
+        updateMenulist (state, allowMenus = []) {
             let accessCode = JSON.parse(Cookies.get('access') ? Cookies.get('access') : 0);
             let menuList = [];
-            appRouter.forEach((item, index) => {
+            allowMenus.forEach((item, index) => {
                 if (item.access !== undefined) {
                     if (Util.isShowRoute(item.access, accessCode)) {
-                        if (item.children.length === 1) {
+                        if (item.children && item.children.length === 1) {
                             menuList.push(item);
                         } else {
                             let len = menuList.push(item);
@@ -63,7 +63,7 @@ const app = {
                         }
                     }
                 } else {
-                    if (item.children.length === 1) {
+                    if (item.children && item.children.length === 1) {
                         menuList.push(item);
                     } else {
                         let len = menuList.push(item);
@@ -87,8 +87,7 @@ const app = {
                     }
                 }
             });
-            console.log(menuList);
-            state.menuList = menuList;
+            state.menuList = allowMenus;
         },
         changeMenuTheme (state, theme) {
             state.menuTheme = theme;
