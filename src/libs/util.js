@@ -134,48 +134,50 @@ util.setCurrentPath = function (vm, name) {
                 return false;
             }
         })[0];
-        if (currentPathObj.children.length <= 1 && currentPathObj.name === 'home') {
-            currentPathArr = [
-                {
-                    title: '首页',
-                    path: '',
-                    name: 'home_index'
-                }
-            ];
-        } else if (currentPathObj.children.length <= 1 && currentPathObj.name !== 'home') {
-            currentPathArr = [
-                {
-                    title: '首页',
-                    path: '/home',
-                    name: 'home_index'
-                },
-                {
-                    title: currentPathObj.title,
-                    path: '',
-                    name: name
-                }
-            ];
-        } else {
-            let childObj = currentPathObj.children.filter((child) => {
-                return child.name === name;
-            })[0];
-            currentPathArr = [
-                {
-                    title: '首页',
-                    path: '/home',
-                    name: 'home_index'
-                },
-                {
-                    title: currentPathObj.title,
-                    path: '',
-                    name: currentPathObj.name
-                },
-                {
-                    title: childObj.title,
-                    path: currentPathObj.path + '/' + childObj.path,
-                    name: name
-                }
-            ];
+        if (currentPathObj) {
+            if (currentPathObj.children.length <= 1 && currentPathObj.name === 'home') {
+                currentPathArr = [
+                    {
+                        title: '首页',
+                        path: '',
+                        name: 'home_index'
+                    }
+                ];
+            } else if (currentPathObj.children.length <= 1 && currentPathObj.name !== 'home') {
+                currentPathArr = [
+                    {
+                        title: '首页',
+                        path: '/home',
+                        name: 'home_index'
+                    },
+                    {
+                        title: currentPathObj.title,
+                        path: '',
+                        name: name
+                    }
+                ];
+            } else {
+                let childObj = currentPathObj.children.filter((child) => {
+                    return child.name === name;
+                })[0];
+                currentPathArr = [
+                    {
+                        title: '首页',
+                        path: '/home',
+                        name: 'home_index'
+                    },
+                    {
+                        title: currentPathObj.title,
+                        path: '',
+                        name: currentPathObj.name
+                    },
+                    {
+                        title: childObj.title,
+                        path: currentPathObj.path + '/' + childObj.path,
+                        name: name
+                    }
+                ];
+            }
         }
     }
     vm.$store.commit('setCurrentPath', currentPathArr);
@@ -276,7 +278,7 @@ util.parseMenuTree = function (menus) {
         temp['tree'][item.relation_id] = {
             path: data.path,
             icon: data.icon,
-            component: () => import(routerList[item.item_code]),
+            component: routerList[item.item_code],
             title: item.item_name,
             parent_id: item.parent_id,
             relation_id: item.relation_id,

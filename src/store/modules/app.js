@@ -197,7 +197,24 @@ const app = {
     actions: {
         filterMenus ({ commit }, obj) {
             const menus = Util.parseMenuTree(obj.treeData);
-            obj.vm.$router.addRoutes(menus);
+            obj.vm.$router.addRoutes(menus.concat([{
+                path: '/*',
+                name: 'error-404',
+                meta: {
+                    title: '404-页面不存在'
+                },
+                component: () => import('@/views/error-page/404.vue')
+            }]));
+
+            menus.map((item) => {
+                let tagsList = [];
+                if (item.children.length <= 1) {
+                    tagsList.push(item.children[0]);
+                } else {
+                    tagsList.push(...item.children);
+                }
+                commit('setTagsList', tagsList);
+            });
             commit('updateMenulist', menus);
         }
     }

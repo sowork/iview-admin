@@ -9,7 +9,7 @@ import VueI18n from 'vue-i18n';
 import axios from './libs/axios';
 import VueAxios from 'vue-axios';
 import permission from './directive/permission';
-import util from './libs/util';
+// import util from './libs/util';
 
 Vue.use(VueI18n);
 Vue.use(iView);
@@ -35,14 +35,5 @@ new Vue({
         // util.checkUpdate(this);
     },
     created () {
-        let tagsList = [];
-        // appRouter.map((item) => {
-        //     if (item.children.length <= 1) {
-        //         tagsList.push(item.children[0]);
-        //     } else {
-        //         tagsList.push(...item.children);
-        //     }
-        // });
-        this.$store.commit('setTagsList', tagsList);
     }
 });

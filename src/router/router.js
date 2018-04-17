@@ -11,14 +11,14 @@ export const loginRouter = {
     component: () => import('@/views/login.vue')
 };
 
-export const page404 = {
-    path: '/*',
-    name: 'error-404',
-    meta: {
-        title: '404-页面不存在'
-    },
-    component: () => import('@/views/error-page/404.vue')
-};
+// export const page404 = {
+//     path: '/*',
+//     name: 'error-404',
+//     meta: {
+//         title: '404-页面不存在'
+//     },
+//     component: () => import('@/views/error-page/404.vue')
+// };
 
 export const page403 = {
     path: '/403',
@@ -266,5 +266,5 @@ export const routers = [
     ...appRouter,
     page500,
     page403,
-    page404
+    // page404
 ];
