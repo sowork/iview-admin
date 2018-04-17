@@ -198,7 +198,6 @@ const app = {
         filterMenus ({ commit }, obj) {
             const menus = Util.parseMenuTree(obj.treeData);
             obj.vm.$router.addRoutes(menus);
-            console.log(menus)
             commit('updateMenulist', menus);
         }
     }
