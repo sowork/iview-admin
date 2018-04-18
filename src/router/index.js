@@ -16,6 +16,7 @@ const RouterConfig = {
 export const router = new VueRouter(RouterConfig);
 
 router.beforeEach((to, from, next) => {
+    console.log(to)
     iView.LoadingBar.start();
     Util.title(to.meta.title);
     if (Cookies.get('locking') === '1' && to.name !== 'locking') { // 判断当前是否是锁定状态
@@ -36,6 +37,7 @@ router.beforeEach((to, from, next) => {
                 name: 'home_index'
             });
         } else {
+            // 权限菜单过滤相关
             const curRouterObj = Util.getRouterObjByName([otherRouter, ...appRouter], to.name);
             if (curRouterObj && curRouterObj.access !== undefined) { // 需要判断权限的路由
                 let allAccess = Cookies.get('access');
@@ -58,7 +60,9 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to) => {
+    console.log(444)
     if (to.name) {
+        console.log(555)
         Util.openNewPage(router.app, to.name, to.params, to.query);
         iView.LoadingBar.finish();
         window.scrollTo(0, 0);

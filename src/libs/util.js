@@ -226,6 +226,8 @@ util.openNewPage = function (vm, name, argu, query) {
 };
 
 util.toDefaultPage = function (routers, name, route, next) {
+    console.log(routers)
+    console.log(name)
     let len = routers.length;
     let i = 0;
     let notHandle = true;
@@ -241,6 +243,7 @@ util.toDefaultPage = function (routers, name, route, next) {
         i++;
     }
     if (notHandle) {
+        console.log(333)
         next();
     }
 };

@@ -87,7 +87,7 @@ const app = {
                     }
                 }
             });
-            state.menuList = allowMenus;
+            state.menuList = menuList;
         },
         changeMenuTheme (state, theme) {
             state.menuTheme = theme;
