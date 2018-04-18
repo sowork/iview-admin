@@ -123,8 +123,7 @@
         methods: {
             init () {
                 let pathArr = util.setCurrentPath(this, this.$route.name);
-                this.$store.dispatch('filterMenus', {treeData: JSON.parse(localStorage.menuList || null), vm: this});
-                console.log(pathArr)
+//                this.$store.dispatch('filterMenus', {treeData: JSON.parse(localStorage.menuList || null), vm: this});
                 if (pathArr.length >= 2) {
                     this.$store.commit('addOpenSubmenu', pathArr[1].name);
                 }
@@ -195,6 +194,7 @@
             this.init();
         },
         created () {
+            console.log('Main.vue created')
             // 显示打开的页面的列表
             this.$store.commit('setOpenedList');
         }

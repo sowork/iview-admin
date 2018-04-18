@@ -7,16 +7,24 @@ import {routers, otherRouter, appRouter} from './router';
 
 Vue.use(VueRouter);
 
+const menus = routers.concat(Util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []), [{
+    path: '/*',
+    name: 'error-404',
+    meta: {
+        title: '404-页面不存在'
+    },
+    component: () => import('@/views/error-page/404.vue')
+}])
+
 // 路由配置
 const RouterConfig = {
     // mode: 'history',
-    routes: routers
+    routes: menus
 };
 
 export const router = new VueRouter(RouterConfig);
 
 router.beforeEach((to, from, next) => {
-    console.log(to)
     iView.LoadingBar.start();
     Util.title(to.meta.title);
     if (Cookies.get('locking') === '1' && to.name !== 'locking') { // 判断当前是否是锁定状态
@@ -60,9 +68,7 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to) => {
-    console.log(444)
     if (to.name) {
-        console.log(555)
         Util.openNewPage(router.app, to.name, to.params, to.query);
         iView.LoadingBar.finish();
         window.scrollTo(0, 0);

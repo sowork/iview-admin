@@ -30,7 +30,7 @@ new Vue({
         this.$store.commit('setOpenedList');
         this.$store.commit('initCachepage');
         // 权限菜单过滤相关
-        this.$store.dispatch('filterMenus', {treeData: JSON.parse(localStorage.menuList || null), vm: this});
+        // this.$store.dispatch('filterMenus', {treeData: JSON.parse(localStorage.menuList || null), vm: this});
         // iview-admin检查更新
         // util.checkUpdate(this);
     },
