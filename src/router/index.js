@@ -4,17 +4,30 @@ import Util from '../libs/util';
 import VueRouter from 'vue-router';
 import Cookies from 'js-cookie';
 import {routers, otherRouter, appRouter} from './router';
+import store from '../store';
 
 Vue.use(VueRouter);
+const userMenus = Util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []);
 
-const menus = routers.concat(Util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []), [{
+store.state.app.menuList = userMenus;
+userMenus.map((item) => {
+    let tagsList = [];
+    if (item.children.length <= 1) {
+        tagsList.push(item.children[0]);
+    } else {
+        tagsList.push(...item.children);
+    }
+    store.commit('setTagsList', tagsList);
+});
+
+const menus = routers.concat(userMenus, [{
     path: '/*',
     name: 'error-404',
     meta: {
         title: '404-页面不存在'
     },
     component: () => import('@/views/error-page/404.vue')
-}])
+}]);
 
 // 路由配置
 const RouterConfig = {
