@@ -267,26 +267,16 @@
             },
             store () {
                 this.formItem._method = 'post';
-                let roleData = {
-                    'ids': this.checkAllGroup,
-                    _method: 'put'
-                };
                 this.axios.post('{{host_v1}}/admin', this.formItem).then(response => {
                     this.editInlineData.push(response.data.data);
-                    return this.axios.post('{{host_v1}}/admin/add/roles/' + response.data.data.id, roleData);
                 }).then(response => {
                     this.modal1 = false;
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
-                let roleData = {
-                    'ids': this.checkAllGroup,
-                    '_method': 'put'
-                };
                 Promise.all([
-                    this.axios.post('{{host_v1}}/admin/' + this.formItem.id, this.formItem),
-                    this.axios.post('{{host_v1}}/admin/add/roles/' + this.formItem.id, roleData)
+                    this.axios.post('{{host_v1}}/admin/' + this.formItem.id, this.formItem)
                 ]).then(([$admin, $roles]) => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, $admin.data.data);

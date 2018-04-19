@@ -32,7 +32,7 @@
                 <div class="header-avator-con">
                     <full-screen v-model="isFullScreen" @on-change="fullscreenChange"></full-screen>
                     <lock-screen></lock-screen>
-                    <message-tip v-model="mesCount"></message-tip>
+                    <message-tip v-model="mesCount" v-permission="'message_index'"></message-tip>
                     <theme-switch></theme-switch>
                     
                     <div class="user-dropdown-menu-con">
@@ -43,7 +43,7 @@
                                     <Icon type="arrow-down-b"></Icon>
                                 </a>
                                 <DropdownMenu slot="list">
-                                    <DropdownItem name="ownSpace">个人中心</DropdownItem>
+                                    <DropdownItem v-permission="'ownspace_index'" name="ownSpace">个人中心</DropdownItem>
                                     <DropdownItem name="loginout" divided>退出登录</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
@@ -194,7 +194,6 @@
             this.init();
         },
         created () {
-            console.log('Main.vue created')
             // 显示打开的页面的列表
             this.$store.commit('setOpenedList');
         }

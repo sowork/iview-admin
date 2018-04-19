@@ -56,6 +56,10 @@
 </template>
 
 <script>
+    import PopTipTransfer from '../auth/component/PopTipTransfer.vue';
+    import Vue from 'vue';
+
+    Vue.component('PopTipTransfer', PopTipTransfer);
     export default {
         name: 'paper_index',
         components: {
@@ -120,20 +124,43 @@
                         width: 200,
                         render: (h, params) => {
                             return h('div', [
-                                h('Button', {
+                                h('PopTipTransfer', {
                                     props: {
-                                        type: 'text',
-                                        size: 'small'
+                                        groupData: this.groupData,
+                                        targetItems: this.targetItems,
+                                        listStyle: this.listStyle,
+                                        operations: this.operations,
+                                        renderItem: this.renderItem,
+                                        items: this.selectItems,
+                                        value: this.returnType,
+                                        placement: 'left'
                                     },
                                     on: {
-                                        click: () => {
-                                            this.$router.push({
-                                                name: 'item.assign',
-                                                query: {data: JSON.stringify({scope: ['user'], 'user': params.row})}
-                                            });
+                                        onPopperShow: (value) => {
+                                            this.loadGroupItems(value, params.row);
+                                        },
+                                        handleChange: (event) => {
+                                            this.handleChange(event, params.row);
+                                        },
+                                        showAllData: (value) => {
+                                            this.loadGroupItems(value, params.row, 0);
+                                        },
+                                        showFilterData: (value) => {
+                                            this.loadGroupItems(value, params.row, 1);
+                                        },
+                                        selectChange: (value) => {
+                                            this.loadGroupItems(value, params.row);
+                                            this.returnType = value;
                                         }
                                     }
-                                }, '节点分配'),
+                                }, [
+                                    h('Button', {
+                                        props: {
+                                            type: 'text',
+                                            size: 'small'
+                                        }
+                                    }, '授权')
+                                ]),
                                 h('Button', {
                                     props: {
                                         type: 'text',
@@ -219,11 +246,79 @@
                     ]
                 },
                 roles: [],
-                checkAllGroup: []
+                checkAllGroup: [],
+                currentScope: '',
+                currentType: '',
+                itemTypes: [
+                    {
+                        value: 3,
+                        name: '角色',
+                        level: 3,
+                        scopes: [
+                            {
+                                value: 'admin',
+                                name: '后台角色'
+                            },
+                            {
+                                value: 'user',
+                                name: '前台角色'
+                            }
+                        ]
+                    },
+                    {
+                        value: 2,
+                        name: '菜单',
+                        level: 2,
+                        scopes: [
+                            {
+                                value: 'admin',
+                                name: '后台菜单'
+                            },
+                            {
+                                value: 'user',
+                                name: '前台菜单'
+                            }
+                        ]
+                    },
+                    {
+                        value: 1,
+                        name: '权限',
+                        level: 1,
+                        scopes: [
+                            {
+                                value: 'admin',
+                                name: '后台权限'
+                            },
+                            {
+                                value: 'user',
+                                name: '前台权限'
+                            }
+                        ]
+                    }
+                ],
+                dataItems: [],
+                initDataItems: [],
+                groupData: [],
+                targetItems: [],
+                selectItems: [],
+                returnType: 0,
+                listStyle: {
+                    width: '250px',
+                    height: '300px'
+                },
+                operations: ['To left', 'To right']
             };
         },
         methods: {
             initData () {
+                this.returnType = this.itemTypes[0]['value'];
+                for (let item of this.itemTypes) {
+                    this.selectItems.push({
+                        name: item.name,
+                        value: item.value
+                    });
+                }
+
                 Promise.all([
                     this.axios.get('{{host_v1}}/user', {
                         'page': this.page,
@@ -301,6 +396,47 @@
             },
             parseDate (date) {
                 this.formItem.user_birthday = date;
+            },
+            loadGroupItems (value, data, filter = 0) {
+                this.groupData = [];
+                this.targetItems = [];
+                Promise.all([
+                    this.axios.get('{{host_v1}}/auth/item/group/original', {
+                        params: {
+                            type: this.currentType,
+                            filter: filter,
+                            scope: 'user',
+                            returnType: value
+                        }
+                    }),
+                    this.axios.get('{{host_v1}}/auth/item/assignment/target', {
+                        params: {
+                            id: data.id
+                        }
+                    })
+                ]).then(([items, targetItems]) => {
+                    if (items.data.data.length > 0) {
+                        for (let item of items.data.data) {
+                            item.key = item.id;
+                            item.label = item.item_name;
+                        }
+                    }
+                    this.groupData = items.data.data;
+                    this.targetItems = targetItems.data.data;
+                });
+            },
+            renderItem (item) {
+                return item.item_name + ' - ' + item.item_desc;
+            },
+            handleChange (targetData, data) {
+                this.axios.post('{{host_v1}}/auth/item/assignment/' + data.id, {
+                    ids: targetData,
+                    scope: this.currentScope
+                }).then(response => {
+                    if (response.data.code === '0') {
+                        this.targetItems = targetData;
+                    }
+                });
             }
         },
         created () {

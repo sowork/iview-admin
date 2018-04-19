@@ -77,8 +77,8 @@
                                 name: '后台菜单'
                             },
                             {
-                                value: 'user',
-                                name: '前台菜单'
+                                value: 'adminTop',
+                                name: '后台顶部菜单'
                             }
                         ]
                     },

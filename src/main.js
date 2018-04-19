@@ -9,7 +9,6 @@ import VueI18n from 'vue-i18n';
 import axios from './libs/axios';
 import VueAxios from 'vue-axios';
 import permission from './directive/permission';
-// import util from './libs/util';
 
 Vue.use(VueI18n);
 Vue.use(iView);
@@ -29,10 +28,6 @@ new Vue({
         // 显示打开的页面的列表
         this.$store.commit('setOpenedList');
         this.$store.commit('initCachepage');
-        // 权限菜单过滤相关
-        // this.$store.dispatch('filterMenus', {treeData: JSON.parse(localStorage.menuList || null), vm: this});
-        // iview-admin检查更新
-        // util.checkUpdate(this);
     },
     created () {
     }

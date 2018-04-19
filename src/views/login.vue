@@ -44,8 +44,8 @@
 
 <script>
 import { mapState } from 'vuex';
+import iView from 'iview';
 import Cookies from 'js-cookie';
-import { appRouter } from '../router/router';
 
 export default {
     data () {
@@ -75,37 +75,42 @@ export default {
             }
             this.$refs.loginForm.validate((valid) => {
                 if (valid) {
+                    iView.LoadingBar.start();
                     this.axios.post(loginUrl, {
                         username: this.form.userName,
                         password: this.form.password
                     }).then((response) => {
                         if (response.data.access_token) {
                             Cookies.set('user', this.form.userName);
-                            return this.axios.get('{{host_v1}}/auth/items', {
-                                params: {
-                                    'scope': 'admin',
-                                    'type': 2
-                                }
-                            });
+                            return Promise.all([
+                                this.axios.get('{{host_v1}}/auth/items', {
+                                    params: {
+                                        'scope': 'admin',
+                                        'type': 2
+                                    }
+                                }),
+                                this.axios.get('{{host_v1}}/auth/items', {
+                                    params: {
+                                        'scope': 'adminTop',
+                                        'type': 2
+                                    }
+                                }),
+                                this.axios.get('{{host_v1}}/auth/items', {
+                                    params: {
+                                        'scope': 'admin',
+                                        'type': 1
+                                    }
+                                })
+                            ]);
                         }
-                    }).then((response) => {
-                        localStorage.menuList = JSON.stringify(response.data.data);
-                        Cookies.set('access', []);
-                        this.$router.push({
-                            name: 'home_index'
-                        });
+                    }).then(([menus, topMenus, permissions]) => {
+                        iView.LoadingBar.finish();
+                        localStorage.menuList = JSON.stringify(menus.data.data);
+                        localStorage.topMenuList = JSON.stringify(topMenus.data.data);
+                        localStorage.permissions = JSON.stringify(permissions.data.data);
+                        Cookies.set('access', permissions.data.data);
+                        window.location.href = '/';
                     });
-//                    Cookies.set('user', this.form.userName);
-//                    Cookies.set('password', this.form.password);
-//                    this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
-//                    if (this.form.userName === 'iview_admin') {
-//                        Cookies.set('access', 0);
-//                    } else {
-//                        Cookies.set('access', 1);
-//                    }
-//                    this.$router.push({
-//                        name: 'home_index'
-//                    });
                 }
             });
         }
