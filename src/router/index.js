@@ -10,6 +10,7 @@ Vue.use(VueRouter);
 const userMenus = Util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []);
 
 store.state.app.menuList = userMenus;
+store.state.app.routers.push(...userMenus);
 userMenus.map((item) => {
     let tagsList = [];
     if (item.children.length <= 1) {
