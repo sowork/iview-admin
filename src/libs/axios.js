@@ -87,7 +87,7 @@ ajax.interceptors.response.use(function (response) {
                 break;
 
             case 403:
-                error.message = '拒绝访问';
+                error.message = '权限不足，拒绝访问';
                 break;
 
             case 404:

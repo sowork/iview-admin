@@ -102,6 +102,7 @@
                 groupData: [],
                 targetItems: [],
                 selectItems: [],
+                selectScopes: [],
                 returnType: 0,
                 listStyle: {
                     width: '250px',
@@ -117,6 +118,7 @@
                 }
                 this.treeData = [];
                 this.selectItems = [];
+                this.selectScopes = [];
                 this.currentItem = {};
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/relation/tree', {
@@ -158,6 +160,9 @@
                     }
 
                     for (let item of this.itemTypes) {
+                        if (item.value === this.returnType) {
+                            this.selectScopes = item.scopes;
+                        }
                         if (item.level <= this.currentItem.level) {
                             this.selectItems.push({
                                 name: item.name,
@@ -346,7 +351,9 @@
                                 operations: this.operations,
                                 renderItem: this.renderItem,
                                 items: this.selectItems,
-                                value: this.returnType
+                                itemDefaultValue: this.returnType,
+                                scopes: this.selectScopes,
+                                scopeDefaultValue: this.selectScopes[0].value
                             },
                             on: {
                                 onPopperShow: (value) => {
@@ -361,9 +368,19 @@
                                 showFilterData: (value) => {
                                     this.loadGroupItems(value, data, 1);
                                 },
-                                selectChange: (value) => {
-                                    this.loadGroupItems(value, data);
-                                    this.returnType = value;
+                                selectItemChange: (itemValue) => {
+                                    for (let item of this.itemTypes) {
+                                        if (itemValue === item.value) {
+                                            this.selectScopes = item.scopes;
+                                        }
+                                    }
+                                    this.currentScope = this.selectScopes[0].value;
+                                    this.loadGroupItems(itemValue, data);
+                                    this.returnType = itemValue;
+                                },
+                                selectScopeChange: (value) => {
+                                    this.currentScope = value;
+                                    this.loadGroupItems(this.returnType, data);
                                 }
                             }
                         }, [

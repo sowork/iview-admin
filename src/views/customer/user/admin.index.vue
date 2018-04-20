@@ -82,7 +82,7 @@
                                         operations: this.operations,
                                         renderItem: this.renderItem,
                                         items: this.selectItems,
-                                        value: this.returnType,
+                                        itemDefaultValue: this.returnType,
                                         placement: 'left'
                                     },
                                     on: {

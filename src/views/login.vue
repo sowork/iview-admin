@@ -108,7 +108,7 @@ export default {
                         localStorage.menuList = JSON.stringify(menus.data.data);
                         localStorage.topMenuList = JSON.stringify(topMenus.data.data);
                         localStorage.permissions = JSON.stringify(permissions.data.data);
-                        Cookies.set('access', permissions.data.data);
+                        localStorage.allItems = JSON.stringify(menus.data.data.concat(topMenus.data.data, permissions.data.data));
                         window.location.href = '/';
                     });
                 }

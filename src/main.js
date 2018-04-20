@@ -8,7 +8,6 @@ import 'iview/dist/styles/iview.css';
 import VueI18n from 'vue-i18n';
 import axios from './libs/axios';
 import VueAxios from 'vue-axios';
-import Cookies from 'js-cookie';
 
 Vue.use(VueI18n);
 Vue.use(iView);
@@ -17,13 +16,17 @@ Vue.use(VueAxios, axios);
 // 注册指令
 Vue.directive('permission', {
     bind: function (el, binding, vnode) {
-        let allAccess = Cookies.get('access');
-        let currentAccess = binding.value;
-        if (currentAccess && allAccess) {
-            allAccess = JSON.parse(allAccess);
-            // if (!Util.isShowRoute(currentAccess, allAccess)) {
+        let items = JSON.parse(localStorage.allItems || null);
+        let currentPermission = binding.value;
+        let flag = false;
+        for (let item of items) {
+            if (item.item_code === currentPermission) {
+                flag = true;
+            }
+        }
+
+        if (!flag) {
             el.style.display = 'none';
-            // }
         }
     }
 });

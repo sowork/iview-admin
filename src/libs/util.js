@@ -29,16 +29,6 @@ util.oneOf = function (ele, targetArr) {
     }
 };
 
-util.isShowRoute = function (allPermissions, currentPermission) {
-    if (typeof currentPermission !== 'object') {
-        currentPermission = [currentPermission];
-    }
-    if (new Set(allPermissions.filter(x => new Set(currentPermission).has(x))).size > 0) {
-        return true;
-    }
-    return false;
-};
-
 util.showThisRoute = function (itAccess, currentAccess) {
     if (typeof currentAccess === 'object' && Array.isArray(itAccess)) {
         return util.oneOf(currentAccess, itAccess);

@@ -11,6 +11,7 @@
             <div>
                 <div class="margin-bottom-10">
                     <Button type="ghost" @click="(httpRequest = actionModal('formItem', 'store')) && httpRequest.next()">添&nbsp;&nbsp;&nbsp;&nbsp;加</Button>
+                    <Button type="ghost" @click="refreshItem">刷新缓存</Button>
                 </div>
                 <Table @on-row-dblclick="dblClick" :columns="editInlineColumns" :data="editInlineData" border ></Table>
             </div>
@@ -48,6 +49,8 @@
     </div>
 </template>
 <script>
+    import { Message } from 'iview';
+
     export default {
         name: 'auth_permission',
         data () {
@@ -293,6 +296,13 @@
                         return item.scopes;
                     }
                 }
+            },
+            refreshItem () {
+                this.axios.get('{{host_v1}}/auth/item/refresh/cache').then(response => {
+                    if (response.data.code === '0') {
+                        Message.success(response.data.msg);
+                    }
+                });
             }
         },
         created () {
