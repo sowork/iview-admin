@@ -10,9 +10,9 @@
             </p>
             <div>
                 <Tabs ref="itemTypes" @on-click="loadItemRelation" style="height: 700px;">
-                    <TabPane :label="type.name" :name="'' + type.value" v-for="(type, index) in itemTypes">
+                    <TabPane :label="type.label" :name="'' + type.value" v-for="(type, index) in itemTypes">
                         <Tabs ref="treeGroups" @on-click="loadItems" style="height: 700px;">
-                            <TabPane :label="scope.name" :name="JSON.stringify({scope: scope.value, type: type.value})" v-for="(scope, index) in type.scopes">
+                            <TabPane :label="scope.label" :name="JSON.stringify({scope: scope.value, type: type.value})" v-for="(scope, index) in type.children">
                                 <Tree :data="tree.data" :render="renderContent" style="width:500px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value"></Tree>
                             </TabPane>
                         </Tabs>
@@ -38,51 +38,51 @@
         data () {
             return {
                 treeData: [],
-                currentScope: '',
+                defaultScope: '',
                 currentType: '',
                 itemTypes: [
                     {
                         value: 3,
-                        name: '角色',
+                        label: '角色',
                         level: 3,
-                        scopes: [
+                        children: [
                             {
                                 value: 'admin',
-                                name: '后台角色'
+                                label: '后台角色'
                             },
                             {
                                 value: 'user',
-                                name: '前台角色'
+                                label: '前台角色'
                             }
                         ]
                     },
                     {
                         value: 2,
-                        name: '菜单',
+                        label: '菜单',
                         level: 2,
-                        scopes: [
+                        children: [
                             {
                                 value: 'admin',
-                                name: '后台菜单'
+                                label: '后台菜单'
                             },
                             {
                                 value: 'adminTop',
-                                name: '后台顶部菜单'
+                                label: '后台顶部菜单'
                             }
                         ]
                     },
                     {
                         value: 1,
-                        name: '权限',
+                        label: '权限',
                         level: 1,
-                        scopes: [
+                        children: [
                             {
                                 value: 'admin',
-                                name: '后台权限'
+                                label: '后台权限'
                             },
                             {
                                 value: 'user',
-                                name: '前台权限'
+                                label: '前台权限'
                             }
                         ]
                     }
@@ -101,9 +101,7 @@
                 initDataItems: [],
                 groupData: [],
                 targetItems: [],
-                selectItems: [],
-                selectScopes: [],
-                returnType: 0,
+                defaultItemValue: [],
                 listStyle: {
                     width: '250px',
                     height: '300px'
@@ -117,8 +115,6 @@
                     type = this.itemTypes[0]['value'];
                 }
                 this.treeData = [];
-                this.selectItems = [];
-                this.selectScopes = [];
                 this.currentItem = {};
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/relation/tree', {
@@ -132,10 +128,13 @@
                     for (let [index, typeItem] of this.itemTypes.entries()) {
                         if (typeItem.value === type) {
                             this.currentItem = typeItem;
-                            this.returnType = this.currentItem.value - 1 > 0 ? this.currentItem.value - 1 : 1;
+                            this.defaultItemValue = [
+                                this.currentItem.value - 1 > 0 ? this.currentItem.value - 1 : 1,
+                                typeItem['children'][0].value
+                            ];
                         }
                         if (typeItem.value === Number.parseInt(type)) {
-                            for (let scope of typeItem.scopes) {
+                            for (let scope of typeItem.children) {
                                 let menu = this.topMenu();
                                 for (let tree of trees.data.data) {
                                     if (scope.value === tree.scope) {
@@ -153,20 +152,8 @@
 
                         if (Number.parseInt(type) === typeItem.value) {
                             this.$refs.treeGroups[index].$emit('on-click', {
-                                scope: this.itemTypes[index]['scopes'][0].value,
+                                scope: this.itemTypes[index]['children'][0].value,
                                 type: type
-                            });
-                        }
-                    }
-
-                    for (let item of this.itemTypes) {
-                        if (item.value === this.returnType) {
-                            this.selectScopes = item.scopes;
-                        }
-                        if (item.level <= this.currentItem.level) {
-                            this.selectItems.push({
-                                name: item.name,
-                                value: item.value
                             });
                         }
                     }
@@ -265,7 +252,7 @@
             store (row, index, parentRow) {
                 this.axios.post('{{host_v1}}/auth/item/relation/' + parentRow.id, {
                     id: row.id,
-                    scope: this.currentScope
+                    scope: this.defaultScope
                 }).then((response) => {
                     if (response.data.code === '0') {
                         const children = parentRow.children || [];
@@ -350,37 +337,24 @@
                                 listStyle: this.listStyle,
                                 operations: this.operations,
                                 renderItem: this.renderItem,
-                                items: this.selectItems,
-                                itemDefaultValue: this.returnType,
-                                scopes: this.selectScopes,
-                                scopeDefaultValue: this.selectScopes[0].value
+                                items: this.itemTypes,
+                                itemDefaultValue: this.defaultItemValue
                             },
                             on: {
                                 onPopperShow: (value) => {
-                                    this.loadGroupItems(value, data);
+                                    this.loadGroupItems(value[0], this.defaultScope, data);
                                 },
                                 handleChange: (event) => {
                                     this.handleChange(event, data);
                                 },
                                 showAllData: (value) => {
-                                    this.loadGroupItems(value, data, 0);
+                                    this.loadGroupItems(value[0], this.defaultScope, data, 0);
                                 },
                                 showFilterData: (value) => {
-                                    this.loadGroupItems(value, data, 1);
+                                    this.loadGroupItems(value[0], this.defaultScope, data, 1);
                                 },
-                                selectItemChange: (itemValue) => {
-                                    for (let item of this.itemTypes) {
-                                        if (itemValue === item.value) {
-                                            this.selectScopes = item.scopes;
-                                        }
-                                    }
-                                    this.currentScope = this.selectScopes[0].value;
-                                    this.loadGroupItems(itemValue, data);
-                                    this.returnType = itemValue;
-                                },
-                                selectScopeChange: (value) => {
-                                    this.currentScope = value;
-                                    this.loadGroupItems(this.returnType, data);
+                                selectItemChange: (value, selectedData) => {
+                                    this.loadGroupItems(value[0], value[1], data, 0);
                                 }
                             }
                         }, [
@@ -393,14 +367,14 @@
                 if (!(obj instanceof Object)) {
                     obj = JSON.parse(obj);
                 }
-                this.currentScope = obj.scope;
+                this.defaultScope = obj.scope;
                 this.currentType = obj.type;
             },
             getItemOriginal (data, filter = 1) {
                 this.dataItems = this.initDataItems = [];
                 this.axios.get('{{host_v1}}/auth/item/relation/original', {
                     params: {
-                        scope: this.currentScope,
+                        scope: this.defaultScope,
                         type: this.currentType,
                         id: data.id,
                         filter: filter
@@ -409,7 +383,7 @@
                     this.dataItems = this.initDataItems = menus.data.data;
                 });
             },
-            loadGroupItems (value, data, filter = 1) {
+            loadGroupItems (itemType, scope, data, filter = 1) {
                 this.groupData = [];
                 this.targetItems = [];
                 Promise.all([
@@ -418,8 +392,8 @@
                             id: data.item.id,
                             type: this.currentType,
                             filter: filter,
-                            scope: this.currentScope,
-                            returnType: value
+                            scope: scope,
+                            returnType: itemType
                         }
                     }),
                     this.axios.get('{{host_v1}}/auth/item/group/target', {
@@ -444,7 +418,7 @@
             handleChange (targetData, data) {
                 this.axios.post('{{host_v1}}/auth/item/group/' + data.item.id, {
                     ids: targetData,
-                    scope: this.currentScope
+                    scope: this.defaultScope
                 }).then(response => {
                     if (response.data.code === '0') {
                         this.targetItems = targetData;

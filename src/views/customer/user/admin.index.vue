@@ -81,26 +81,25 @@
                                         listStyle: this.listStyle,
                                         operations: this.operations,
                                         renderItem: this.renderItem,
-                                        items: this.selectItems,
-                                        itemDefaultValue: this.returnType,
+                                        items: this.itemTypes,
+                                        itemDefaultValue: this.defaultItemValue,
                                         placement: 'left'
                                     },
                                     on: {
                                         onPopperShow: (value) => {
-                                            this.loadGroupItems(value, params.row);
+                                            this.loadGroupItems(value[0], value[1], params.row);
                                         },
                                         handleChange: (event) => {
                                             this.handleChange(event, params.row);
                                         },
                                         showAllData: (value) => {
-                                            this.loadGroupItems(value, params.row, 0);
+                                            this.loadGroupItems(value[0], value[1], params.row, 0);
                                         },
                                         showFilterData: (value) => {
-                                            this.loadGroupItems(value, params.row, 1);
+                                            this.loadGroupItems(value[0], value[1], params.row);
                                         },
-                                        selectChange: (value) => {
-                                            this.loadGroupItems(value, params.row);
-                                            this.returnType = value;
+                                        selectItemChange: (value, selectedData) => {
+                                            this.loadGroupItems(value[0], value[1], params.row);
                                         }
                                     }
                                 }, [
@@ -170,51 +169,49 @@
                         { max: 32, message: '最多输入32个字符', trigger: 'blur' }
                     ]
                 },
-                currentScope: '',
-                currentType: '',
                 itemTypes: [
                     {
                         value: 3,
-                        name: '角色',
+                        label: '角色',
                         level: 3,
-                        scopes: [
+                        children: [
                             {
                                 value: 'admin',
-                                name: '后台角色'
+                                label: '后台角色'
                             },
                             {
                                 value: 'user',
-                                name: '前台角色'
+                                label: '前台角色'
                             }
                         ]
                     },
                     {
                         value: 2,
-                        name: '菜单',
+                        label: '菜单',
                         level: 2,
-                        scopes: [
+                        children: [
                             {
                                 value: 'admin',
-                                name: '后台菜单'
+                                label: '后台菜单'
                             },
                             {
-                                value: 'user',
-                                name: '前台菜单'
+                                value: 'adminTop',
+                                label: '后台顶部菜单'
                             }
                         ]
                     },
                     {
                         value: 1,
-                        name: '权限',
+                        label: '权限',
                         level: 1,
-                        scopes: [
+                        children: [
                             {
                                 value: 'admin',
-                                name: '后台权限'
+                                label: '后台权限'
                             },
                             {
                                 value: 'user',
-                                name: '前台权限'
+                                label: '前台权限'
                             }
                         ]
                     }
@@ -223,8 +220,7 @@
                 initDataItems: [],
                 groupData: [],
                 targetItems: [],
-                selectItems: [],
-                returnType: 0,
+                defaultItemValue: [],
                 listStyle: {
                     width: '250px',
                     height: '300px'
@@ -234,13 +230,10 @@
         },
         methods: {
             initData () {
-                this.returnType = this.itemTypes[0]['value'];
-                for (let item of this.itemTypes) {
-                    this.selectItems.push({
-                        name: item.name,
-                        value: item.value
-                    });
-                }
+                this.defaultItemValue = [
+                    this.itemTypes[0]['value'],
+                    this.itemTypes[0]['children'][0].value
+                ];
 
                 Promise.all([
                     this.axios.get('{{host_v1}}/admin', {
@@ -305,16 +298,16 @@
                 this.number = number;
                 this.initData();
             },
-            loadGroupItems (value, data, filter = 0) {
+            loadGroupItems (itemType, scope, data, filter = 1) {
                 this.groupData = [];
                 this.targetItems = [];
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/group/original', {
                         params: {
-                            type: this.currentType,
+                            type: itemType,
                             filter: filter,
-                            scope: 'admin',
-                            returnType: value
+                            scope: scope,
+                            returnType: itemType
                         }
                     }),
                     this.axios.get('{{host_v1}}/auth/item/assignment/target', {
