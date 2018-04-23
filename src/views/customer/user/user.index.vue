@@ -404,7 +404,8 @@
                     }),
                     this.axios.get('{{host_v1}}/auth/item/assignment/target', {
                         params: {
-                            id: data.id
+                            id: data.id,
+                            provider: 'users'
                         }
                     })
                 ]).then(([items, targetItems]) => {
@@ -424,7 +425,7 @@
             handleChange (targetData, data) {
                 this.axios.post('{{host_v1}}/auth/item/assignment/' + data.id, {
                     ids: targetData,
-                    scope: this.currentScope
+                    provider: 'users'
                 }).then(response => {
                     if (response.data.code === '0') {
                         this.targetItems = targetData;
