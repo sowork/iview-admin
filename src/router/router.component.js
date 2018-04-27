@@ -8,4 +8,7 @@ export const routerList = {
     'user.manage': () => import('@/views/Main.vue'),
     'user.index': () => import('@/views/customer/user/user.index.vue'),
     'admin.index': () => import('@/views/customer/user/admin.index.vue'),
+
+    'setting': () => import('@/views/Main.vue'),
+    'client.list': () => import('@/views/customer/setting/client.index.vue'),
 };

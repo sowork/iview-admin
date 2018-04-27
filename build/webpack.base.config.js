@@ -24,7 +24,7 @@ module.exports = {
                 options: {
                     loaders: {
                         css: 'vue-style-loader!css-loader',
-                        less: 'vue-style-loader!css-loader!less-loader'
+                        less: 'vue-style-loader!css-loader!less-loader!sass-loader'
                     },
                     postLoaders: {
                         html: 'babel-loader'
