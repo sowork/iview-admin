@@ -10,9 +10,9 @@ const apiDomain = {
         'host_v1': 'http://127.0.0.1/api/v1'
     },
     'production': {
-        'host': 'http://192.168.1.21:8802',
-        'host_api': 'http://192.168.1.21:8802/api',
-        'host_v1': 'http://192.168.1.21:8802/api/v1'
+        'host': 'http://192.168.1.21:8803',
+        'host_api': 'http://192.168.1.21:8803/api',
+        'host_v1': 'http://192.168.1.21:8803/api/v1'
     }
 };
 
