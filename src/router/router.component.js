@@ -10,5 +10,5 @@ export const routerList = {
     'admin.index': () => import('@/views/customer/user/admin.index.vue'),
 
     'setting': () => import('@/views/Main.vue'),
-    // 'client.list': () => import('@/views/customer/setting/client.index.vue'),
+    'client.list': () => import('@/views/customer/setting/client.index.vue'),
 };

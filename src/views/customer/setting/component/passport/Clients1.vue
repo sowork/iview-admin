@@ -10,18 +10,6 @@
 
 <template>
     <div>
-        <Card>
-            <p slot="title">
-                <Icon type="android-remove"></Icon>
-                OAuth Clients
-            </p>
-            <div>
-                <div class="margin-bottom-10">
-                    <Button type="ghost" @click="(httpRequest = actionModal('formItem', 'store')) && httpRequest.next()">添&nbsp;&nbsp;&nbsp;&nbsp;加</Button>
-                </div>
-                <Table @on-row-dblclick="dblClick" :columns="editInlineColumns" :data="editInlineData" border ></Table>
-            </div>
-        </Card>
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
