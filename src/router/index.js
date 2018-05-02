@@ -13,12 +13,14 @@ store.state.app.menuList = userMenus;
 store.state.app.routers.push(...userMenus);
 userMenus.map((item) => {
     let tagsList = [];
-    if (item.children.length <= 1) {
-        tagsList.push(item.children[0]);
-    } else {
-        tagsList.push(...item.children);
+    if (item.children) {
+        if (item.children.length <= 1) {
+            tagsList.push(item.children[0]);
+        } else {
+            tagsList.push(...item.children);
+        }
+        store.commit('setTagsList', tagsList);
     }
-    store.commit('setTagsList', tagsList);
 });
 
 const menus = routers.concat(userMenus, [{

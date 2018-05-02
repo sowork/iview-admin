@@ -1,19 +1,9 @@
-<style scoped>
-    .action-link {
-        cursor: pointer;
-    }
-
-    .m-b-none {
-        margin-bottom: 0;
-    }
-</style>
-
 <template>
     <div>
         <Card>
             <p slot="title">
                 <Icon type="android-remove"></Icon>
-                OAuth Clients
+                OAuth客户端列表
             </p>
             <div>
                 <div class="margin-bottom-10">
@@ -22,351 +12,168 @@
                 <Table @on-row-dblclick="dblClick" :columns="editInlineColumns" :data="editInlineData" border ></Table>
             </div>
         </Card>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>
-                        OAuth Clients
-                    </span>
-
-                    <a class="action-link" @click="showCreateClientForm">
-                        Create New Client
-                    </a>
-                </div>
+        <Modal v-model="modal1" title="客户端管理" @keydown.enter.native="httpRequest.next()">
+            <Form ref="formItem" :model="formItem" :rules="ruleInline" :label-width="100">
+                <FormItem label="客户端名称" prop="name">
+                    <Input type="text" v-model="formItem.name" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="重定向地址" prop="redirect">
+                    <Input type="text" v-model="formItem.redirect" placeholder=""></Input>
+                </FormItem>
+            </Form>
+            <div slot="footer">
+                <Button type="ghost" @click="reset('formItem')">重置</Button>
+                <Button type="primary" @click="httpRequest.next()">确认</Button>
             </div>
-
-            <div class="panel-body">
-                <!-- Current Clients -->
-                <p class="m-b-none" v-if="clients.length === 0">
-                    You have not created any OAuth clients.
-                </p>
-
-                <table class="table table-borderless m-b-none" v-if="clients.length > 0">
-                    <thead>
-                        <tr>
-                            <th>Client ID</th>
-                            <th>Name</th>
-                            <th>Secret</th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr v-for="client in clients">
-                            <!-- ID -->
-                            <td style="vertical-align: middle;">
-                                {{ client.id }}
-                            </td>
-
-                            <!-- Name -->
-                            <td style="vertical-align: middle;">
-                                {{ client.name }}
-                            </td>
-
-                            <!-- Secret -->
-                            <td style="vertical-align: middle;">
-                                <code>{{ client.secret }}</code>
-                            </td>
-
-                            <!-- Edit Button -->
-                            <td style="vertical-align: middle;">
-                                <a class="action-link" @click="edit(client)">
-                                    Edit
-                                </a>
-                            </td>
-
-                            <!-- Delete Button -->
-                            <td style="vertical-align: middle;">
-                                <a class="action-link text-danger" @click="destroy(client)">
-                                    Delete
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Create Client Modal -->
-        <div class="modal fade" id="modal-create-client" tabindex="-1" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button " class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-
-                        <h4 class="modal-title">
-                            Create Client
-                        </h4>
-                    </div>
-
-                    <div class="modal-body">
-                        <!-- Form Errors -->
-                        <div class="alert alert-danger" v-if="createForm.errors.length > 0">
-                            <p><strong>Whoops!</strong> Something went wrong!</p>
-                            <br>
-                            <ul>
-                                <li v-for="error in createForm.errors">
-                                    {{ error }}
-                                </li>
-                            </ul>
-                        </div>
-
-                        <!-- Create Client Form -->
-                        <form class="form-horizontal" role="form">
-                            <!-- Name -->
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">Name</label>
-
-                                <div class="col-md-7">
-                                    <input id="create-client-name" type="text" class="form-control"
-                                                                @keyup.enter="store" v-model="createForm.name">
-
-                                    <span class="help-block">
-                                        Something your users will recognize and trust.
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Redirect URL -->
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">Redirect URL</label>
-
-                                <div class="col-md-7">
-                                    <input type="text" class="form-control" name="redirect"
-                                                    @keyup.enter="store" v-model="createForm.redirect">
-
-                                    <span class="help-block">
-                                        Your application's authorization callback URL.
-                                    </span>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Modal Actions -->
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-
-                        <button type="button" class="btn btn-primary" @click="store">
-                            Create
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Edit Client Modal -->
-        <div class="modal fade" id="modal-edit-client" tabindex="-1" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button " class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-
-                        <h4 class="modal-title">
-                            Edit Client
-                        </h4>
-                    </div>
-
-                    <div class="modal-body">
-                        <!-- Form Errors -->
-                        <div class="alert alert-danger" v-if="editForm.errors.length > 0">
-                            <p><strong>Whoops!</strong> Something went wrong!</p>
-                            <br>
-                            <ul>
-                                <li v-for="error in editForm.errors">
-                                    {{ error }}
-                                </li>
-                            </ul>
-                        </div>
-
-                        <!-- Edit Client Form -->
-                        <form class="form-horizontal" role="form">
-                            <!-- Name -->
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">Name</label>
-
-                                <div class="col-md-7">
-                                    <input id="edit-client-name" type="text" class="form-control"
-                                                                @keyup.enter="update" v-model="editForm.name">
-
-                                    <span class="help-block">
-                                        Something your users will recognize and trust.
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Redirect URL -->
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">Redirect URL</label>
-
-                                <div class="col-md-7">
-                                    <input type="text" class="form-control" name="redirect"
-                                                    @keyup.enter="update" v-model="editForm.redirect">
-
-                                    <span class="help-block">
-                                        Your application's authorization callback URL.
-                                    </span>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Modal Actions -->
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-
-                        <button type="button" class="btn btn-primary" @click="update">
-                            Save Changes
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </Modal>
     </div>
 </template>
 
 <script>
-    import _ from 'lodash';
-    import $ from 'jquery';
-//    require('bootstrap-sass');
-
     export default {
         name: 'Clients',
-        /*
-         * The component's data.
-         */
         data () {
             return {
-                clients: [],
-
-                createForm: {
-                    errors: [],
+                httpRequest: '',
+                editInlineColumns: [
+                    {
+                        title: '客户端ID',
+                        align: 'center',
+                        key: 'id'
+                    },
+                    {
+                        title: '客户端名称',
+                        align: 'center',
+                        key: 'name'
+                    },
+                    {
+                        title: '密钥',
+                        align: 'center',
+                        key: 'secret'
+                    },
+                    {
+                        title: '重定向地址',
+                        align: 'center',
+                        key: 'redirect'
+                    },
+                    {
+                        title: '操作',
+                        key: 'action',
+                        align: 'center',
+                        fixed: 'right',
+                        width: 200,
+                        render: (h, params) => {
+                            return h('div', [
+                                h('Button', {
+                                    props: {
+                                        type: 'text',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.dblClick(JSON.parse(JSON.stringify(this.editInlineData[params.index])), params.index);
+                                        }
+                                    }
+                                }, '编辑'),
+                                h('Poptip', {
+                                    props: {
+                                        confirm: true,
+                                        title: '您确定要删除这条数据吗?',
+                                        transfer: true
+                                    },
+                                    on: {
+                                        'on-ok': () => {
+                                            this.formItem = params.row;
+                                            this.destroy(params.index);
+                                        }
+                                    }
+                                }, [
+                                    h('Button', {
+                                        props: {
+                                            type: 'text',
+                                            size: 'small'
+                                        }
+                                    }, '删除')
+                                ])
+                            ]);
+                        }
+                    }
+                ],
+                editInlineData: [],
+                formItem: {
                     name: '',
+                    secret: '',
+                    item_desc: '',
                     redirect: ''
                 },
-
-                editForm: {
-                    errors: [],
-                    name: '',
-                    redirect: ''
+                ruleInline: {
+                    name: [
+                        { required: true, message: '客户端名称不能为空', trigger: 'blur' }
+                    ],
+                    redirect: [
+                        { required: true, message: '重定向地址不能为空', trigger: 'blur' }
+                    ]
                 },
-
-                'modal-create-client': 'false'
+                modal1: false
             };
         },
-
-        /**
-         * Prepare the component (Vue 1.x).
-         */
         ready () {
-            this.prepareComponent();
+            this.initData();
         },
-
-        /**
-         * Prepare the component (Vue 2.x).
-         */
         mounted () {
-            this.prepareComponent();
+            this.initData();
         },
 
         methods: {
-            /**
-             * Prepare the component.
-             */
-            prepareComponent () {
+            initData () {
                 this.getClients();
-
-                $('#modal-create-client').on('shown.bs.modal', () => {
-                    $('#create-client-name').focus();
-                });
-
-                $('#modal-edit-client').on('shown.bs.modal', () => {
-                    $('#edit-client-name').focus();
-                });
             },
-
-            /**
-             * Get all of the OAuth clients for the user.
-             */
             getClients () {
                 this.axios.get('{{host}}/oauth/clients')
                     .then(response => {
-                        this.clients = response.data;
+                        this.editInlineData = response.data;
                     });
             },
-
-            /**
-             * Show the form for creating new clients.
-             */
-            showCreateClientForm () {
-                $('#modal-create-client').modal('show');
-            },
-
-            /**
-             * Create a new OAuth client for the user.
-             */
-            store () {
-                this.persistClient(
-                    'post', '/oauth/clients',
-                    this.createForm, '#modal-create-client'
-                );
-            },
-
-            /**
-             * Edit the given client.
-             */
-            edit (client) {
-                this.editForm.id = client.id;
-                this.editForm.name = client.name;
-                this.editForm.redirect = client.redirect;
-
-                $('#modal-edit-client').modal('show');
-            },
-
-            /**
-             * Update the client being edited.
-             */
-            update () {
-                this.persistClient(
-                    'put', '{{host}}/oauth/clients/' + this.editForm.id,
-                    this.editForm, '#modal-edit-client'
-                );
-            },
-
-            /**
-             * Persist the client to storage using the given form.
-             */
-            persistClient (method, uri, form, modal) {
-                form.errors = [];
-
-                this.axios[method](uri, form)
-                    .then(response => {
-                        this.getClients();
-
-                        form.name = '';
-                        form.redirect = '';
-                        form.errors = [];
-
-                        $(modal).modal('hide');
-                    })
-                    .catch(error => {
-                        if (typeof error.response.data === 'object') {
-                            form.errors = _.flatten(_.toArray(error.response.data));
-                        } else {
-                            form.errors = ['Something went wrong. Please try again.'];
+            * actionModal (name, method, index = 0) {
+                if (method === 'store') {
+                    this.reset(name);
+                }
+                yield this.modal1 = true;
+                while (true) {
+                    yield this.$refs[name].validate(valid => {
+                        if (valid) {
+                            this[method](index);
                         }
                     });
+                }
             },
-
-            /**
-             * Destroy the given client.
-             */
-            destroy (client) {
-                this.axios.delete('{{host}}/oauth/clients/' + client.id)
-                    .then(response => {
-                        this.getClients();
-                    });
+            store () {
+                this.formItem._method = 'post';
+                this.axios.post('{{host}}/oauth/clients', this.formItem).then(response => {
+                    this.modal1 = false;
+                    this.editInlineData.unshift(response.data.data);
+                });
+            },
+            update (index) {
+                this.formItem._method = 'put';
+                this.axios.post('{{host}}/oauth/clients/' + this.formItem.id, this.formItem).then(response => {
+                    this.modal1 = false;
+                    this.editInlineData.splice(index, 1, response.data.data);
+                });
+            },
+            destroy (index) {
+                this.formItem._method = 'delete';
+                this.axios.post('{{host}}/oauth/clients/' + this.formItem.id, this.formItem).then(response => {
+                    this.editInlineData.splice(index, 1);
+                });
+            },
+            reset (name) {
+                this.$refs[name].resetFields();
+            },
+            dblClick (row, index) {
+                this.formItem = row;
+                this.httpRequest = this.actionModal('formItem', 'update', index);
+                this.httpRequest.next();
             }
         }
     };
