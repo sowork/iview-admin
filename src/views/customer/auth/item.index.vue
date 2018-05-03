@@ -152,14 +152,6 @@
                                     props: {
                                         type: 'dot',
                                         color: color
-                                    },
-                                    nativeOn: {
-                                        click: () => {
-                                            this.$router.push({
-                                                name: 'item.group',
-                                                query: {data: JSON.stringify(params.row)}
-                                            });
-                                        }
                                     }
                                 }, text)
                             ]);

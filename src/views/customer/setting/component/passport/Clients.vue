@@ -151,14 +151,14 @@
                 this.formItem._method = 'post';
                 this.axios.post('{{host}}/oauth/clients', this.formItem).then(response => {
                     this.modal1 = false;
-                    this.editInlineData.unshift(response.data.data);
+                    this.editInlineData.unshift(response.data);
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
                 this.axios.post('{{host}}/oauth/clients/' + this.formItem.id, this.formItem).then(response => {
                     this.modal1 = false;
-                    this.editInlineData.splice(index, 1, response.data.data);
+                    this.editInlineData.splice(index, 1, Object.assign(this.formItem, response.data));
                 });
             },
             destroy (index) {
