@@ -25,7 +25,7 @@
                     <Input type="text" v-model="formItem.item_name" placeholder=""></Input>
                 </FormItem>
                 <FormItem label="节点类型" prop="item_type">
-                    <Select v-model="formItem.item_type">
+                    <Select v-model.number="formItem.item_type">
                         <Option v-for="item in itemTypes" :value="item.value" :key="item.value">{{ item.name }}</Option>
                     </Select>
                 </FormItem>
@@ -122,7 +122,7 @@
                         render: (h, params) => {
                             let scopeStr = [];
                             for (let item of this.itemTypes) {
-                                if (item.value === params.row.item_type) { // 类型对应
+                                if (item.value === Number.parseInt(params.row.item_type)) { // 类型对应
                                     for (let itemScope of item.scopes) {
                                         for (let scope of params.row.scope.split(',')) {
                                             if (itemScope.value === scope) {
@@ -140,10 +140,10 @@
                         align: 'center',
                         render: (h, params) => {
                             const row = params.row;
-                            const color = row.item_type === 1 ? 'blue' : row.item_type === 2 ? 'green' : 'red';
+                            const color = Number.parseInt(row.item_type) === 1 ? 'blue' : Number.parseInt(row.item_type) === 2 ? 'green' : 'red';
                             let text = '';
                             for (let item of this.itemTypes) {
-                                if (item.value === params.row.item_type) {
+                                if (item.value === Number.parseInt(params.row.item_type)) {
                                     text = item.name;
                                 }
                             }
@@ -210,7 +210,7 @@
                     item_code: '',
                     item_name: '',
                     item_desc: '',
-                    item_type: '',
+                    item_type: 0,
                     scope: [],
                     other_data: ''
                 },

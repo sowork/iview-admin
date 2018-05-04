@@ -110,7 +110,7 @@
                         align: 'center',
                         render: (h, params) => {
                             for (let school of this.schools) {
-                                if (school.id === params.row.school_id) {
+                                if (school.id === Number.parseInt(params.row.school_id)) {
                                     return school.school_name;
                                 }
                             }
