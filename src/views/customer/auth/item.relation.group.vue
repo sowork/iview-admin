@@ -220,12 +220,15 @@
                     }
                 };
             },
-            destroy (data) {
+            destroy (root, node, data) {
                 this.axios.post('{{host_v1}}/auth/item/relation/tree/' + data.id, {
                     _method: 'delete'
                 }).then((response) => {
                     if (response.data.code === '0') {
-                        this.initData();
+                        const parentKey = root.find(el => el === node).parent;
+                        const parent = root.find(el => el.nodeKey === parentKey).node;
+                        const index = parent.children.indexOf(data);
+                        parent.children.splice(index, 1);
                     }
                 });
             },
@@ -320,7 +323,7 @@
                             },
                             on: {
                                 'on-ok': () => {
-                                    this.destroy(data);
+                                    this.destroy(root, node, data);
                                 }
                             }
                         }, [

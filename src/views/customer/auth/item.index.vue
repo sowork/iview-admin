@@ -210,7 +210,7 @@
                     item_code: '',
                     item_name: '',
                     item_desc: '',
-                    item_type: 0,
+                    item_type: '',
                     scope: [],
                     other_data: ''
                 },
