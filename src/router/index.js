@@ -9,9 +9,10 @@ import store from '../store';
 Vue.use(VueRouter);
 const userMenus = Util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []);
 
-store.state.app.menuList = userMenus;
+store.state.app.spliteAppMenu = Util.spliteMenu(appRouter); // 自定义路由
+store.state.app.menuList = userMenus.concat(appRouter);
 store.state.app.routers.push(...userMenus);
-userMenus.map((item) => {
+store.state.app.menuList.map((item) => {
     let tagsList = [];
     if (item.children) {
         if (item.children.length <= 1) {

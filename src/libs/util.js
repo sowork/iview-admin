@@ -1,7 +1,8 @@
 import axios from 'axios';
 import semver from 'semver';
 import packjson from '../../package.json';
-import { routerList } from "../router/router.component";
+import { routerList } from '../router/router.component';
+import { appRouter } from '../router/router';
 
 let util = {
 
@@ -235,11 +236,24 @@ util.toDefaultPage = function (routers, name, route, next) {
     }
 };
 
+util.spliteMenu = function (router = appRouter) {
+    let routers = [];
+    for (let menu of router) {
+        if (menu.children !== undefined && menu.children.length > 0) {
+            let tmpMenu = JSON.parse(JSON.stringify(menu));
+            tmpMenu.children = undefined;
+            routers.push(tmpMenu);
+            routers = routers.concat(util.spliteMenu(menu.children));
+        } else {
+            routers.push(menu);
+        }
+    }
+
+    return routers;
+};
+
 util.fullscreenEvent = function (vm) {
     vm.$store.commit('initCachepage');
-    // 权限菜单过滤相关
-    vm.$store.dispatch('filterMenus', {treeData: JSON.parse(localStorage.menuList || null), vm: vm});
-    // 全屏相关
 };
 
 util.checkUpdate = function (vm) {
