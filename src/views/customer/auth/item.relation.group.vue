@@ -286,7 +286,7 @@
                                 marginRight: '8px'
                             }
                         }),
-                        h('span', data.item.item_name)
+                        h('span', data.item_name)
                     ]),
                     h('span', {
                         style: {
@@ -392,7 +392,7 @@
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/group/original', {
                         params: {
-                            id: data.item.id,
+                            id: data.id,
                             type: this.currentType,
                             filter: filter,
                             scope: scope,
@@ -401,7 +401,7 @@
                     }),
                     this.axios.get('{{host_v1}}/auth/item/group/target', {
                         params: {
-                            id: data.item.id
+                            id: data.id
                         }
                     })
                 ]).then(([items, targetItems]) => {
@@ -419,7 +419,7 @@
                 return item.item_name + ' - ' + item.item_desc;
             },
             handleChange (targetData, data) {
-                this.axios.post('{{host_v1}}/auth/item/group/' + data.item.id, {
+                this.axios.post('{{host_v1}}/auth/item/group/' + data.id, {
                     ids: targetData,
                     scope: this.defaultScope
                 }).then(response => {

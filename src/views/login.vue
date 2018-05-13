@@ -43,7 +43,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import iView from 'iview';
 import Cookies from 'js-cookie';
 
@@ -116,8 +115,6 @@ export default {
         }
     },
     computed: {
-        ...mapState([
-        ])
     }
 };
 </script>
