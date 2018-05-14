@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../../styles/common.less';
 </style>
 <template>
     <div>
@@ -9,13 +9,9 @@
                 菜单管理
             </p>
             <div>
-                <Tabs ref="itemTypes" @on-click="loadItemRelation" style="height: 700px;">
-                    <TabPane :label="type.label" :name="'' + type.value" v-for="(type, index) in itemTypes">
-                        <Tabs ref="treeGroups" @on-click="loadItems" style="height: 700px;">
-                            <TabPane :label="scope.label" :name="JSON.stringify({scope: scope.value, type: type.value})" v-for="(scope, index) in type.children">
-                                <Tree :data="tree.data" :render="renderContent" style="width:500px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value"></Tree>
-                            </TabPane>
-                        </Tabs>
+                <Tabs ref="treeGroups" @on-click="loadMenu" style="height: 700px;">
+                    <TabPane :label="scope.name" :name="scope.value" v-for="(scope, index) in itemScopes">
+                        <Tree :data="tree.data" :render="renderContent" style="width:500px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value || tree.data[0].id === 0"></Tree>
                     </TabPane>
                 </Tabs>
             </div>
@@ -38,53 +34,16 @@
         data () {
             return {
                 treeData: [],
-                defaultScope: '',
-                currentType: '',
-                itemTypes: [
+                currentScope: '',
+                scopes: [],
+                itemScopes: [
                     {
-                        value: 3,
-                        label: '角色',
-                        level: 3,
-                        children: [
-                            {
-                                value: 'admin',
-                                label: '后台角色'
-                            },
-                            {
-                                value: 'user',
-                                label: '前台角色'
-                            }
-                        ]
+                        value: 'admin',
+                        name: '后台菜单'
                     },
                     {
-                        value: 2,
-                        label: '菜单',
-                        level: 2,
-                        children: [
-                            {
-                                value: 'admin',
-                                label: '后台菜单'
-                            },
-                            {
-                                value: 'adminTop',
-                                label: '后台顶部菜单'
-                            }
-                        ]
-                    },
-                    {
-                        value: 1,
-                        label: '权限',
-                        level: 1,
-                        children: [
-                            {
-                                value: 'admin',
-                                label: '后台权限'
-                            },
-                            {
-                                value: 'user',
-                                label: '前台权限'
-                            }
-                        ]
+                        value: 'user',
+                        name: '前台菜单'
                     }
                 ],
                 columns: [
@@ -101,69 +60,55 @@
                 initDataItems: [],
                 groupData: [],
                 targetItems: [],
-                defaultItemValue: [],
                 listStyle: {
                     width: '250px',
                     height: '300px'
                 },
-                operations: ['To left', 'To right']
+                operations: ['To left', 'To right'],
+                itemTypes: [
+                    {
+                        value: 1,
+                        name: '权限',
+                        level: 1
+                    },
+                    {
+                        value: 2,
+                        name: '菜单',
+                        level: 2
+                    },
+                    {
+                        value: 3,
+                        name: '角色',
+                        level: 3
+                    }
+                ]
             };
         },
         methods: {
-            initData (type) {
-                if (type === undefined) {
-                    type = this.itemTypes[0]['value'];
-                }
-                this.treeData = [];
-                this.currentItem = {};
+            initData () {
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/relation/tree', {
                         params: {
-                            type: type
+                            type: 2
                         }
                     })
                 ]).then(([trees]) => {
-                    let defaultRootItems = [];
-                    /* 加载选择节点 */
-                    for (let [index, typeItem] of this.itemTypes.entries()) {
-                        if (typeItem.value === type) {
-                            this.currentItem = typeItem;
-                            this.defaultItemValue = [
-                                this.currentItem.value - 1 > 0 ? this.currentItem.value - 1 : 1,
-                                typeItem['children'][0].value
-                            ];
+                    if (trees.data.data.length > 0) {
+                        for (let tree of trees.data.data) {
+                            let menu = this.topMenu();
+                            menu.children = JSON.parse(JSON.stringify(tree.data));
+                            tree.data = [menu];
                         }
-                        if (typeItem.value === Number.parseInt(type)) {
-                            for (let scope of typeItem.children) {
-                                let menu = this.topMenu();
-                                for (let tree of trees.data.data) {
-                                    if (scope.value === tree.scope) {
-                                        menu.children = tree.data;
-                                    }
-                                }
-                                defaultRootItems[scope.value] = {
-                                    data: [
-                                        menu
-                                    ],
-                                    scope: scope.value
-                                };
-                            }
-                        }
-
-                        if (Number.parseInt(type) === typeItem.value) {
-                            this.$refs.treeGroups[index].$emit('on-click', {
-                                scope: this.itemTypes[index]['children'][0].value,
-                                type: type
-                            });
-                        }
+                        this.treeData = trees.data.data;
+                    } else {
+                        this.treeData = [{data: [this.topMenu()], name: '初始化菜单'}];
                     }
-
-                    this.treeData = Object.values(defaultRootItems);
+                    this.$refs.treeGroups.$emit('on-click', this.itemScopes[0].value);
                 });
             },
             topMenu () {
                 return {
-                    title: '添加顶级节点',
+                    title: '添加顶级菜单',
                     id: 0,
                     expand: true,
                     render: (h, {root, node, data}) => {
@@ -199,10 +144,7 @@
                                     },
                                     on: {
                                         search: this.search,
-                                        dbClick: this.store,
-                                        'on-popper-show': () => {
-                                            this.getItemOriginal(data);
-                                        }
+                                        dbClick: this.store
                                     }
                                 }, [
                                     h('Button', {
@@ -220,15 +162,12 @@
                     }
                 };
             },
-            destroy (root, node, data) {
+            destroy (data) {
                 this.axios.post('{{host_v1}}/auth/item/relation/tree/' + data.id, {
                     _method: 'delete'
                 }).then((response) => {
                     if (response.data.code === '0') {
-                        const parentKey = root.find(el => el === node).parent;
-                        const parent = root.find(el => el.nodeKey === parentKey).node;
-                        const index = parent.children.indexOf(data);
-                        parent.children.splice(index, 1);
+                        this.initData();
                     }
                 });
             },
@@ -255,7 +194,7 @@
             store (row, index, parentRow) {
                 this.axios.post('{{host_v1}}/auth/item/relation/' + parentRow.id, {
                     id: row.id,
-                    scope: this.defaultScope
+                    scope: this.currentScope
                 }).then((response) => {
                     if (response.data.code === '0') {
                         const children = parentRow.children || [];
@@ -286,7 +225,7 @@
                                 marginRight: '8px'
                             }
                         }),
-                        h('span', data.item_name)
+                        h('span', data.item.item_name)
                     ]),
                     h('span', {
                         style: {
@@ -303,10 +242,7 @@
                             },
                             on: {
                                 search: this.search,
-                                dbClick: this.store,
-                                'on-popper-show': () => {
-                                    this.getItemOriginal(data);
-                                }
+                                dbClick: this.store
                             }
                         }, [
                             h('Button', {
@@ -323,7 +259,7 @@
                             },
                             on: {
                                 'on-ok': () => {
-                                    this.destroy(root, node, data);
+                                    this.destroy(data);
                                 }
                             }
                         }, [
@@ -339,71 +275,47 @@
                                 targetItems: this.targetItems,
                                 listStyle: this.listStyle,
                                 operations: this.operations,
-                                renderItem: this.renderItem,
-                                items: this.itemTypes,
-                                itemDefaultValue: this.defaultItemValue
+                                renderItem: this.renderItem
                             },
                             on: {
-                                onPopperShow: (value) => {
-                                    this.loadGroupItems(value[0], this.defaultScope, data);
+                                onPopperShow: () => {
+                                    this.getPermissions(data);
                                 },
                                 handleChange: (event) => {
                                     this.handleChange(event, data);
                                 },
-                                showAllData: (value) => {
-                                    this.loadGroupItems(value[0], this.defaultScope, data, 0);
-                                },
-                                showFilterData: (value) => {
-                                    this.loadGroupItems(value[0], this.defaultScope, data, 1);
-                                },
-                                selectItemChange: (value, selectedData) => {
-                                    this.loadGroupItems(value[0], value[1], data, 0);
+                                showAllData: () => {
+                                    this.getPermissions(data, 0);
                                 }
                             }
                         }, [
-                            h('Button', '分配')
+                            h('Button', '权限')
                         ])
                     ])
                 ]);
             },
-            loadItems (obj) {
-                if (!(obj instanceof Object)) {
-                    obj = JSON.parse(obj);
-                }
-                this.defaultScope = obj.scope;
-                this.currentType = obj.type;
-            },
-            getItemOriginal (data, filter = 1) {
-                this.dataItems = this.initDataItems = [];
-                this.axios.get('{{host_v1}}/auth/item/relation/original', {
+            loadMenu (name) {
+                this.currentScope = name;
+                this.axios.get('{{host_v1}}/auth/menu/show/list', {
                     params: {
-                        scope: this.defaultScope,
-                        type: this.currentType,
-                        id: data.id,
-                        filter: filter
+                        scope: name
                     }
                 }).then(menus => {
                     this.dataItems = this.initDataItems = menus.data.data;
                 });
             },
-            loadGroupItems (itemType, scope, data, filter = 1) {
+            getPermissions (data, filter = 1) {
                 this.groupData = [];
                 this.targetItems = [];
                 Promise.all([
-                    this.axios.get('{{host_v1}}/auth/item/group/original', {
+                    this.axios.get('{{host_v1}}/auth/item/group/original/' + data.item.id, {
                         params: {
-                            id: data.id,
-                            type: this.currentType,
+                            types: 1,
                             filter: filter,
-                            scope: scope,
-                            returnType: itemType
+                            scope: this.currentScope
                         }
                     }),
-                    this.axios.get('{{host_v1}}/auth/item/group/target', {
-                        params: {
-                            id: data.id
-                        }
-                    })
+                    this.axios.get('{{host_v1}}/auth/item/group/target/' + data.item.id)
                 ]).then(([items, targetItems]) => {
                     if (items.data.data.length > 0) {
                         for (let item of items.data.data) {
@@ -419,17 +331,13 @@
                 return item.item_name + ' - ' + item.item_desc;
             },
             handleChange (targetData, data) {
-                this.axios.post('{{host_v1}}/auth/item/group/' + data.id, {
-                    ids: targetData,
-                    scope: this.defaultScope
+                this.axios.post('{{host_v1}}/auth/item/add/group/' + data.item.id, {
+                    ids: targetData
                 }).then(response => {
                     if (response.data.code === '0') {
                         this.targetItems = targetData;
                     }
                 });
-            },
-            loadItemRelation (type) {
-                this.initData(Number.parseInt(type));
             }
         },
         created () {

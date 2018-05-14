@@ -72,18 +72,19 @@ export const otherRouter = {
 export let appRouter = [
 
     {
-        path: '/manage',
+        path: '/school/manage',
         icon: 'key',
         name: 'manage',
         title: '学校管理',
         component: Main,
         children: [
-            { path: 'grade/index', title: '年级管理', name: 'grade.index', component: () => import('@/views/customer/grade/grade.index.vue') },
-            { path: 'class/index', title: '班级管理', name: 'class.index', component: () => import('@/views/customer/class/class.index.vue') },
-            { path: 'student/index', title: '学生管理', name: 'student.index', component: () => import('@/views/customer/student/student.index.vue') },
-            // { path: 'paper/index', title: '试卷管理', access: ['paper.index'], name: 'paper.index', component: () => import('@/views/customer/paper/paper.index.vue') },
-            // { path: 'template/index', title: '模板管理', name: 'template.index', component: () => import('@/views/customer/template/template.index.vue') },
-            // { path: 'quota/index', title: '指标管理', name: 'quota.index', component: () => import('@/views/customer/quota/quota.index.vue') },
+            { path: 'grade/index', title: '年级列表', name: 'grade.index', component: () => import('@/views/customer/school/grade/grade.index.vue') },
+            { path: 'class/index', title: '班级列表', name: 'class.index', component: () => import('@/views/customer/school/class/class.index.vue') },
+            { path: 'student/index', title: '学生列表', name: 'student.index', component: () => import('@/views/customer/school/student/student.index.vue') },
+            { path: 'user/index', title: '用户列表', name: 'school.user.index', component: () => import('@/views/customer/school/user/user.index.vue') },
+            // { path: 'paper/index', title: '试卷管理', access: ['paper.index'], name: 'paper.index', component: () => import('@/views/customer/school/paper/paper.index.vue') },
+            // { path: 'template/index', title: '模板管理', name: 'template.index', component: () => import('@/views/customer/school/template/template.index.vue') },
+            // { path: 'quota/index', title: '指标管理', name: 'quota.index', component: () => import('@/views/customer/quota/school/quota.index.vue') },
         ]
     },
     // {

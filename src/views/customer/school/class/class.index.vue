@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../../styles/common.less';
 </style>
 
 <template>
@@ -7,7 +7,7 @@
         <Card>
             <p slot="title">
                 <Icon type="android-remove"></Icon>
-                试卷列表
+                年级管理
             </p>
             <div class="edittable-table-height-con">
                 <div class="margin-bottom-10">
@@ -15,35 +15,32 @@
                 </div>
                 <Table @on-row-dblclick="dblClick" :columns="editInlineColumns" :data="editInlineData" border ></Table>
             </div>
-            <div class="margin-top-20">
-                <Page @on-change="onChange" @on-page-size-change="onPageSizeChange" :total="total" show-total size="small" show-elevator show-sizer></Page>
-            </div>
         </Card>
-        <Modal :loading="loading" v-model="modal1" title="试卷" @keydown.enter.native="httpRequest.next()">
+        <Modal :loading="loading" v-model="modal1" title="年级管理" @keydown.enter.native="httpRequest.next()">
             <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
-                <FormItem label="试卷编号" prop="paper_code">
-                    <Input v-model="formItem.paper_code" placeholder=""></Input>
+                <FormItem label="班级名称" prop="class_name">
+                    <Input v-model="formItem.class_name" placeholder=""></Input>
                 </FormItem>
-                <FormItem label="试卷类型" prop="paper_type">
-                    <Select v-model="formItem.paper_type">
-                        <Option v-for="item in paper_types" :value="item.value" :key="item.value">{{ item.name }}</Option>
+                <FormItem label="年级" prop="grade_id">
+                    <Select v-model="formItem.grade_id">
+                        <Option v-for="item in grades" :value="item.id" :key="item.id">{{ item.grade_name }}</Option>
                     </Select>
-                </FormItem>
-                <FormItem label="归属课程" prop="course_id">
-                    <Select v-model="formItem.course_id">
-                        <Option v-for="item in courses" :value="item.course_id" :key="item.course_id">{{ item.course_name }}</Option>
-                    </Select>
-                </FormItem>
-                <FormItem label="试卷总分" prop="paper_sum_score">
-                    <Input v-model.number="formItem.paper_sum_score" placeholder=""></Input>
-                </FormItem>
-                <FormItem label="试卷描述" prop="paper_desc">
-                    <Input v-model="formItem.paper_desc" type="textarea" :autosize="{minRows: 2,maxRows: 5}" placeholder=""></Input>
                 </FormItem>
             </Form>
             <div slot="footer">
                 <Button type="ghost" @click="reset('formItem')">重置</Button>
                 <Button type="primary" @click="httpRequest.next()">确认</Button>
+            </div>
+        </Modal>
+        <Modal :loading="loading" v-model="modal2" title="课程选择" @keydown.enter.native="httpRequest2.next()">
+            <Form ref="formItem2" :model="formItem2" :label-width="80">
+                <Select v-model="formItem2.course_ids" multiple filterable>
+                    <Option v-for="item in courses" :value="item.id" :key="item.id">{{ item.course_name }}</Option>
+                </Select>
+            </Form>
+            <div slot="footer">
+                <Button type="ghost" @click="reset('formItem2')">重置</Button>
+                <Button type="primary" @click="addCourses">确认</Button>
             </div>
         </Modal>
     </div>
@@ -63,50 +60,39 @@
                         key: 'id'
                     },
                     {
-                        title: '试卷编号',
+                        title: '班级名称',
                         align: 'center',
-                        key: 'paper_code'
+                        key: 'class_name'
                     },
                     {
-                        title: '试卷类型',
+                        title: '年级',
                         align: 'center',
                         render: (h, params) => {
-                            for (let item of Array.from(this.paper_types)) {
-                                if (item.value === params.row.paper_type) {
-                                    return item.name;
+                            for (let grade of Array.from(this.grades)) {
+                                if (grade.id === params.row.grade_id) {
+                                    return grade.grade_name;
                                 }
                             }
                         }
-                    },
-                    {
-                        title: '归属课程',
-                        align: 'center',
-                        render: (h, params) => {
-                            for (let course of this.courses) {
-                                if (course.course_id === params.row.course_id) {
-                                    return course.course_name;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        title: '试卷总分',
-                        align: 'center',
-                        key: 'paper_sum_score'
-                    },
-                    {
-                        title: '试卷描述',
-                        align: 'center',
-                        key: 'paper_desc'
                     },
                     {
                         title: '操作',
                         key: 'action',
                         align: 'center',
                         fixed: 'right',
-                        width: 120,
                         render: (h, params) => {
                             return h('div', [
+                                h('Button', {
+                                    props: {
+                                        type: 'text',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.showCourse(JSON.parse(JSON.stringify(this.editInlineData[params.index])), params.index);
+                                        }
+                                    }
+                                }, '课程管理'),
                                 h('Button', {
                                     props: {
                                         type: 'text',
@@ -147,65 +133,39 @@
                 page: 1,
                 number: 10,
                 modal1: false,
+                modal2: false,
                 loading: false,
-                courses: [],
-                paper_types: [
-                    {
-                        value: 1,
-                        name: '平常测验'
-                    },
-                    {
-                        value: 2,
-                        name: '期中试卷'
-                    },
-                    {
-                        value: 3,
-                        name: '期末试卷'
-                    }
-                ],
                 httpRequest: '',
+                grades: [],
+                courses: [],
                 formItem: {
-                    paper_code: '',
-                    paper_desc: '',
-                    course_id: '',
-                    paper_type: '',
-                    paper_sum_score: ''
+                    class_name: '',
+                    grade_id: ''
+                },
+                formItem2: {
+                    course_ids: [],
+                    cid: 0
                 },
                 ruleValidate: {
-                    paper_code: [
-                        {required: true, type: 'string', message: '试卷编码不能为空', trigger: 'blur'}
+                    class_name: [
+                        {required: true, message: '班级名称不能为空', trigger: 'blur'}
                     ],
-                    paper_sum_score: [
-                        {required: true, type: 'number', message: '试卷总分不能为空', trigger: 'blur'}
-                    ],
-                    course_id: [
-                        {required: true, type: 'number', message: '请选择试卷对应的课程', trigger: 'change'}
-                    ],
-                    paper_type: [
-                        {required: true, type: 'number', message: '请选择试卷对应的类型', trigger: 'change'}
-                    ],
-                    paper_desc: [
-                        {required: true, type: 'string', message: '试卷描述不能为空', trigger: 'blur'}
+                    grade_id: [
+                        {required: true, type: 'number', message: '年级不能为空', trigger: 'change'}
                     ]
                 }
             };
         },
         methods: {
             initData () {
-                this.axios.get('{{host_v1}}/examination/paper', {
-                    params: {
-                        'page': this.page,
-                        'number': this.number
-                    }
-                }).then(response => {
-                    this.editInlineData = response.data.data.data;
-                    this.total = response.data.data.total;
-                });
-
-                this.axios.get('{{host_v1}}/school/courses').then(response => {
-                    if (response.data.data) {
-                        this.courses = response.data.data;
-                    }
+                Promise.all([
+                    this.axios.get('{{host_v1}}/classes'),
+                    this.axios.get('{{host_v1}}/grade/index'),
+                    this.axios.get('{{host_v1}}/course')
+                ]).then(([templates, grades, courses]) => {
+                    this.editInlineData = templates.data.data;
+                    this.grades = grades.data.data;
+                    this.courses = courses.data.data;
                 });
             },
             * actionModal (name, method, index = 0) {
@@ -223,21 +183,21 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{host_v1}}/examination/paper', this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/classes', this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.push(response.data.data);
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
-                this.axios.post('{{host_v1}}/examination/paper/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/classes/' + this.formItem.id, this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, response.data.data);
                 });
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/examination/paper/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/classes/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -256,6 +216,24 @@
             onPageSizeChange (number) {
                 this.number = number;
                 this.initData();
+            },
+            showCourse (row, index) {
+                this.axios.get('{{host_v1}}/class/course', {
+                    params: {
+                        id: row.id
+                    }
+                }).then(response => {
+                    this.formItem2.course_ids = response.data.data;
+                });
+                this.formItem2.cid = row.id;
+                this.modal2 = true;
+            },
+            addCourses () {
+                this.axios.post('{{host_v1}}/class/add/course', this.formItem2).then(response => {
+                    if (response.data.code === '0') {
+                        this.modal2 = false;
+                    }
+                });
             }
         },
         created () {

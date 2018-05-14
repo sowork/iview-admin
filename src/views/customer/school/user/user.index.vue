@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../../styles/common.less';
 </style>
 
 <template>
@@ -7,7 +7,7 @@
         <Card>
             <p slot="title">
                 <Icon type="android-remove"></Icon>
-                后台用户
+                前台用户
             </p>
             <div class="edittable-table-height-con">
                 <div class="margin-bottom-10">
@@ -19,16 +19,27 @@
                 <Page @on-change="onChange" @on-page-size-change="onPageSizeChange" :total="total" show-total size="small" show-elevator show-sizer></Page>
             </div>
         </Card>
-        <Modal :loading="loading" v-model="modal1" title="后台用户" @keydown.enter.native="httpRequest.next()">
+        <Modal :loading="loading" v-model="modal1" title="前台用户" @keydown.enter.native="httpRequest.next()">
             <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
-                <FormItem label="用户姓名" prop="name">
-                    <Input v-model="formItem.name" placeholder=""></Input>
+                <FormItem label="用户姓名" prop="user_name">
+                    <Input v-model="formItem.user_name" placeholder=""></Input>
                 </FormItem>
-                <FormItem label="账户名称" prop="username">
-                    <Input v-model="formItem.username" placeholder=""></Input>
+                <FormItem label="账户名称" prop="user_email">
+                    <Input v-model="formItem.user_email" placeholder=""></Input>
                 </FormItem>
                 <FormItem label="账户密码" prop="password">
-                    <Input type="password" v-model="formItem.password" placeholder=""></Input>
+                    <Input type="password" v-model="formItem.password" placeholder="不填默认为123456"></Input>
+                </FormItem>
+                <FormItem label="用户电话" prop="user_tel">
+                    <Input v-model="formItem.user_tel" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="用户性别" prop="user_sex">
+                    <Select v-model="formItem.user_sex">
+                        <Option v-for="item in sexTypes" :value="item.value" :key="item.value">{{ item.name }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="用户生日" prop="user_birthday">
+                    <DatePicker @on-change="parseDate" format="yyyy-MM-dd HH:mm:ss" :value="formItem.user_birthday" type="date" placeholder="选择日期" style="width: 200px"></DatePicker>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -40,15 +51,23 @@
 </template>
 
 <script>
-    import PopTipTransfer from '../auth/component/PopTipTransfer.vue';
+    import PopTipTransfer from '../../common/auth/component/PopTipTransfer.vue';
     import Vue from 'vue';
 
     Vue.component('PopTipTransfer', PopTipTransfer);
-
     export default {
+        name: 'paper_index',
         components: {
         },
         data () {
+            const validePhone = (rule, value, callback) => {
+                var re = /^1[0-9]{10}$/;
+                if (value !== null && !re.test(value)) {
+                    callback(new Error('请输入正确格式的手机号'));
+                } else {
+                    callback();
+                }
+            };
             return {
                 editInlineColumns: [
                     {
@@ -59,12 +78,27 @@
                     {
                         title: '用户名称',
                         align: 'center',
-                        key: 'name'
+                        key: 'user_name'
                     },
                     {
                         title: '账户名称',
                         align: 'center',
-                        key: 'username'
+                        key: 'user_email'
+                    },
+                    {
+                        title: '用户电话',
+                        align: 'center',
+                        key: 'user_tel'
+                    },
+                    {
+                        title: '性别',
+                        align: 'center',
+                        key: 'user_sex'
+                    },
+                    {
+                        title: '用户生日',
+                        align: 'center',
+                        key: 'user_birthday'
                     },
                     {
                         title: '操作',
@@ -151,24 +185,42 @@
                 number: 10,
                 modal1: false,
                 loading: false,
+                sexTypes: [
+                    {
+                        value: '男',
+                        name: '男'
+                    },
+                    {
+                        value: '女',
+                        name: '女'
+                    }
+                ],
                 httpRequest: '',
                 formItem: {
-                    name: '',
-                    username: '',
-                    password: ''
+                    user_name: '',
+                    user_email: '',
+                    password: '',
+                    user_birthday: null,
+                    user_tel: null,
+                    user_sex: ''
                 },
                 ruleValidate: {
-                    name: [
+                    user_name: [
                         {required: true, type: 'string', message: '用户姓名不能为空', trigger: 'blur'}
                     ],
-                    username: [
+                    user_email: [
                         {required: true, type: 'string', message: '账户名称不能为空', trigger: 'blur'}
                     ],
                     password: [
                         { min: 6, message: '请至少输入6个字符', trigger: 'blur' },
                         { max: 32, message: '最多输入32个字符', trigger: 'blur' }
+                    ],
+                    user_tel: [
+                        {validator: validePhone}
                     ]
                 },
+                roles: [],
+                checkAllGroup: [],
                 itemTypes: [
                     {
                         value: 3,
@@ -236,9 +288,11 @@
                 ];
 
                 Promise.all([
-                    this.axios.get('{{host_v1}}/admin', {
-                        'page': this.page,
-                        'number': this.number
+                    this.axios.get('{{host_v1}}/school/users', {
+                        params: {
+                            'page': this.page,
+                            'number': this.number
+                        }
                     })
                 ]).then(([users]) => {
                     this.editInlineData = users.data.data.data;
@@ -260,7 +314,7 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{host_v1}}/admin', this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/school/user/store', this.formItem).then(response => {
                     this.editInlineData.push(response.data.data);
                 }).then(response => {
                     this.modal1 = false;
@@ -269,15 +323,15 @@
             update (index) {
                 this.formItem._method = 'put';
                 Promise.all([
-                    this.axios.post('{{host_v1}}/admin/' + this.formItem.id, this.formItem)
-                ]).then(([$admin, $roles]) => {
+                    this.axios.post('{{host_v1}}/school/user/update/' + this.formItem.id, this.formItem)
+                ]).then(([$user, $roles]) => {
                     this.modal1 = false;
-                    this.editInlineData.splice(index, 1, $admin.data.data);
+                    this.editInlineData.splice(index, 1, $user.data.data);
                 });
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/admin/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/school/user/destroy/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -298,6 +352,9 @@
                 this.number = number;
                 this.initData();
             },
+            parseDate (date) {
+                this.formItem.user_birthday = date;
+            },
             loadGroupItems (itemType, scope, data, filter = 1) {
                 this.groupData = [];
                 this.targetItems = [];
@@ -313,7 +370,7 @@
                     this.axios.get('{{host_v1}}/auth/item/assignment/target', {
                         params: {
                             id: data.id,
-                            provider: 'admins'
+                            provider: 'users'
                         }
                     })
                 ]).then(([items, targetItems]) => {
@@ -333,7 +390,7 @@
             handleChange (targetData, data) {
                 this.axios.post('{{host_v1}}/auth/item/assignment/' + data.id, {
                     ids: targetData,
-                    provider: 'admins'
+                    provider: 'users'
                 }).then(response => {
                     if (response.data.code === '0') {
                         this.targetItems = targetData;

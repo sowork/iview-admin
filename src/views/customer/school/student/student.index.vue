@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../../styles/common.less';
 </style>
 
 <template>
@@ -7,40 +7,46 @@
         <Card>
             <p slot="title">
                 <Icon type="android-remove"></Icon>
-                年级管理
+                学生列表
             </p>
-            <div class="edittable-table-height-con">
+            <div>
                 <div class="margin-bottom-10">
                     <Button type="ghost" @click="(httpRequest = actionModal('formItem', 'store')) && httpRequest.next()">添&nbsp;&nbsp;&nbsp;&nbsp;加</Button>
                 </div>
                 <Table @on-row-dblclick="dblClick" :columns="editInlineColumns" :data="editInlineData" border ></Table>
+                <div class="margin-top-20">
+                    <Page @on-change="onChange" @on-page-size-change="onPageSizeChange" :total="total" show-total size="small" show-elevator show-sizer></Page>
+                </div>
             </div>
         </Card>
-        <Modal :loading="loading" v-model="modal1" title="年级管理" @keydown.enter.native="httpRequest.next()">
+        <Modal :loading="loading" v-model="modal1" title="试卷" @keydown.enter.native="httpRequest.next()">
             <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
-                <FormItem label="班级名称" prop="class_name">
-                    <Input v-model="formItem.class_name" placeholder=""></Input>
-                </FormItem>
-                <FormItem label="年级" prop="grade_id">
-                    <Select v-model="formItem.grade_id">
-                        <Option v-for="item in grades" :value="item.id" :key="item.id">{{ item.grade_name }}</Option>
+                <FormItem label="班级" prop="class_id">
+                    <Select v-model="formItem.class_id">
+                        <Option v-for="item in classes" :value="item.id" :key="item.id">{{ item.class_name }}</Option>
                     </Select>
+                </FormItem>
+                <FormItem label="学号" prop="stu_card">
+                    <Input v-model="formItem.stu_card" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="姓名" prop="stu_name">
+                    <Input v-model="formItem.stu_name" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="性别" prop="stu_sex">
+                    <Select v-model="formItem.stu_sex">
+                        <Option v-for="item in sex" :value="item.value" :key="item.value">{{ item.name }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="出生日期" prop="user_birthday">
+                    <DatePicker @on-change="parseDate" format="yyyy-MM-dd HH:mm:ss" :value="formItem.stu_birthday" type="date" placeholder="选择日期" style="width: 200px"></DatePicker>
+                </FormItem>
+                <FormItem label="nfc码" prop="nfc_id_code">
+                    <Input v-model="formItem.nfc_id_code" placeholder=""></Input>
                 </FormItem>
             </Form>
             <div slot="footer">
                 <Button type="ghost" @click="reset('formItem')">重置</Button>
                 <Button type="primary" @click="httpRequest.next()">确认</Button>
-            </div>
-        </Modal>
-        <Modal :loading="loading" v-model="modal2" title="课程选择" @keydown.enter.native="httpRequest2.next()">
-            <Form ref="formItem2" :model="formItem2" :label-width="80">
-                <Select v-model="formItem2.course_ids" multiple filterable>
-                    <Option v-for="item in courses" :value="item.id" :key="item.id">{{ item.course_name }}</Option>
-                </Select>
-            </Form>
-            <div slot="footer">
-                <Button type="ghost" @click="reset('formItem2')">重置</Button>
-                <Button type="primary" @click="addCourses">确认</Button>
             </div>
         </Modal>
     </div>
@@ -60,39 +66,49 @@
                         key: 'id'
                     },
                     {
-                        title: '班级名称',
+                        title: '学号',
                         align: 'center',
-                        key: 'class_name'
+                        key: 'stu_card'
                     },
                     {
-                        title: '年级',
+                        title: '姓名',
+                        align: 'center',
+                        key: 'stu_name'
+                    },
+                    {
+                        title: '性别',
+                        align: 'center',
+                        key: 'stu_sex'
+                    },
+                    {
+                        title: '出生日期',
+                        align: 'center',
+                        key: 'stu_birthday'
+                    },
+                    {
+                        title: '班级',
                         align: 'center',
                         render: (h, params) => {
-                            for (let grade of Array.from(this.grades)) {
-                                if (grade.id === params.row.grade_id) {
-                                    return grade.grade_name;
+                            for (let item of this.classes) {
+                                if (item.id === params.row.class_id) {
+                                    return item.class_name;
                                 }
                             }
                         }
+                    },
+                    {
+                        title: 'nfc码',
+                        align: 'center',
+                        key: 'nfc_id_code'
                     },
                     {
                         title: '操作',
                         key: 'action',
                         align: 'center',
                         fixed: 'right',
+                        width: 120,
                         render: (h, params) => {
                             return h('div', [
-                                h('Button', {
-                                    props: {
-                                        type: 'text',
-                                        size: 'small'
-                                    },
-                                    on: {
-                                        click: () => {
-                                            this.showCourse(JSON.parse(JSON.stringify(this.editInlineData[params.index])), params.index);
-                                        }
-                                    }
-                                }, '课程管理'),
                                 h('Button', {
                                     props: {
                                         type: 'text',
@@ -133,39 +149,57 @@
                 page: 1,
                 number: 10,
                 modal1: false,
-                modal2: false,
                 loading: false,
                 httpRequest: '',
-                grades: [],
-                courses: [],
                 formItem: {
-                    class_name: '',
-                    grade_id: ''
-                },
-                formItem2: {
-                    course_ids: [],
-                    cid: 0
+                    stu_card: '',
+                    stu_name: '',
+                    stu_sex: '',
+                    stu_birthday: '',
+                    class_id: '',
+                    nfc_id_code: ''
                 },
                 ruleValidate: {
-                    class_name: [
-                        {required: true, message: '班级名称不能为空', trigger: 'blur'}
+                    stu_card: [
+                        {required: true, type: 'string', message: '学号不能为空', trigger: 'blur'}
                     ],
-                    grade_id: [
-                        {required: true, type: 'number', message: '年级不能为空', trigger: 'change'}
+                    stu_name: [
+                        {required: true, type: 'string', message: '姓名不能为空', trigger: 'blur'}
+                    ],
+                    stu_sex: [
+                        {required: true, type: 'string', message: '性别不能为空', trigger: 'change'}
+                    ],
+                    class_id: [
+                        {required: true, type: 'number', message: '班级不能为空', trigger: 'blur'}
                     ]
-                }
+                },
+                classes: [],
+                sex: [
+                    {
+                        name: '男',
+                        value: '男'
+                    },
+                    {
+                        name: '女',
+                        value: '女'
+                    }
+                ]
             };
         },
         methods: {
             initData () {
                 Promise.all([
-                    this.axios.get('{{host_v1}}/classes'),
-                    this.axios.get('{{host_v1}}/grade/index'),
-                    this.axios.get('{{host_v1}}/course')
-                ]).then(([templates, grades, courses]) => {
-                    this.editInlineData = templates.data.data;
-                    this.grades = grades.data.data;
-                    this.courses = courses.data.data;
+                    this.axios.get('{{host_v1}}/student', {
+                        params: {
+                            'page': this.page,
+                            'number': this.number
+                        }
+                    }),
+                    this.axios.get('{{host_v1}}/classes')
+                ]).then(([students, classes]) => {
+                    this.editInlineData = students.data.data.data;
+                    this.total = students.data.data.total;
+                    this.classes = classes.data.data;
                 });
             },
             * actionModal (name, method, index = 0) {
@@ -183,21 +217,21 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{host_v1}}/classes', this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/student', this.formItem).then(response => {
                     this.modal1 = false;
-                    this.editInlineData.push(response.data.data);
+                    this.editInlineData.unshift(response.data.data);
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
-                this.axios.post('{{host_v1}}/classes/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/student/' + this.formItem.id, this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, response.data.data);
                 });
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/classes/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/student/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -217,23 +251,8 @@
                 this.number = number;
                 this.initData();
             },
-            showCourse (row, index) {
-                this.axios.get('{{host_v1}}/class/course', {
-                    params: {
-                        id: row.id
-                    }
-                }).then(response => {
-                    this.formItem2.course_ids = response.data.data;
-                });
-                this.formItem2.cid = row.id;
-                this.modal2 = true;
-            },
-            addCourses () {
-                this.axios.post('{{host_v1}}/class/add/course', this.formItem2).then(response => {
-                    if (response.data.code === '0') {
-                        this.modal2 = false;
-                    }
-                });
+            parseDate (date) {
+                this.formItem.user_birthday = date;
             }
         },
         created () {

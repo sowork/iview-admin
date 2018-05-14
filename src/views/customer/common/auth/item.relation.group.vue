@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../../styles/common.less';
 </style>
 <template>
     <div>
@@ -10,9 +10,9 @@
             </p>
             <div>
                 <Tabs ref="itemTypes" @on-click="loadItemRelation" style="height: 700px;">
-                    <TabPane :label="type.name" :name="'' + type.value" v-for="(type, index) in itemTypes">
+                    <TabPane :label="type.label" :name="'' + type.value" v-for="(type, index) in itemTypes">
                         <Tabs ref="treeGroups" @on-click="loadItems" style="height: 700px;">
-                            <TabPane :label="scope.name" :name="JSON.stringify({scope: scope.value, type: type.value})" v-for="(scope, index) in type.scopes">
+                            <TabPane :label="scope.label" :name="JSON.stringify({scope: scope.value, type: type.value})" v-for="(scope, index) in type.children">
                                 <Tree :data="tree.data" :render="renderContent" style="width:500px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value"></Tree>
                             </TabPane>
                         </Tabs>
@@ -38,49 +38,51 @@
         data () {
             return {
                 treeData: [],
-                currentScope: '',
+                defaultScope: '',
                 currentType: '',
-                scopes: [],
                 itemTypes: [
                     {
                         value: 3,
-                        name: '角色',
-                        scopes: [
+                        label: '角色',
+                        level: 3,
+                        children: [
                             {
                                 value: 'admin',
-                                name: '后台角色'
+                                label: '后台角色'
                             },
                             {
                                 value: 'user',
-                                name: '前台角色'
+                                label: '前台角色'
                             }
                         ]
                     },
                     {
                         value: 2,
-                        name: '菜单',
-                        scopes: [
+                        label: '菜单',
+                        level: 2,
+                        children: [
                             {
                                 value: 'admin',
-                                name: '后台菜单'
+                                label: '后台菜单'
                             },
                             {
-                                value: 'user',
-                                name: '前台菜单'
+                                value: 'adminTop',
+                                label: '后台顶部菜单'
                             }
                         ]
                     },
                     {
                         value: 1,
-                        name: '权限',
-                        scopes: [
+                        label: '权限',
+                        level: 1,
+                        children: [
                             {
                                 value: 'admin',
-                                name: '后台权限'
+                                label: '后台权限'
                             },
                             {
                                 value: 'user',
-                                name: '前台权限'
+                                label: '前台权限'
                             }
                         ]
                     }
@@ -99,6 +101,7 @@
                 initDataItems: [],
                 groupData: [],
                 targetItems: [],
+                defaultItemValue: [],
                 listStyle: {
                     width: '250px',
                     height: '300px'
@@ -111,6 +114,8 @@
                 if (type === undefined) {
                     type = this.itemTypes[0]['value'];
                 }
+                this.treeData = [];
+                this.currentItem = {};
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/relation/tree', {
                         params: {
@@ -121,8 +126,15 @@
                     let defaultRootItems = [];
                     /* 加载选择节点 */
                     for (let [index, typeItem] of this.itemTypes.entries()) {
+                        if (typeItem.value === type) {
+                            this.currentItem = typeItem;
+                            this.defaultItemValue = [
+                                this.currentItem.value - 1 > 0 ? this.currentItem.value - 1 : 1,
+                                typeItem['children'][0].value
+                            ];
+                        }
                         if (typeItem.value === Number.parseInt(type)) {
-                            for (let scope of typeItem.scopes) {
+                            for (let scope of typeItem.children) {
                                 let menu = this.topMenu();
                                 for (let tree of trees.data.data) {
                                     if (scope.value === tree.scope) {
@@ -140,7 +152,7 @@
 
                         if (Number.parseInt(type) === typeItem.value) {
                             this.$refs.treeGroups[index].$emit('on-click', {
-                                scope: this.itemTypes[index]['scopes'][0].value,
+                                scope: this.itemTypes[index]['children'][0].value,
                                 type: type
                             });
                         }
@@ -208,12 +220,15 @@
                     }
                 };
             },
-            destroy (data) {
-                this.axios.post('{{host_v1}}/auth/item/relation/tree/' + data.id, {
+            destroy (root, node, data) {
+                this.axios.post('{{host_v1}}/auth/item/relation/tree/' + data.relation_id, {
                     _method: 'delete'
                 }).then((response) => {
                     if (response.data.code === '0') {
-                        this.initData();
+                        const parentKey = root.find(el => el === node).parent;
+                        const parent = root.find(el => el.nodeKey === parentKey).node;
+                        const index = parent.children.indexOf(data);
+                        parent.children.splice(index, 1);
                     }
                 });
             },
@@ -240,7 +255,7 @@
             store (row, index, parentRow) {
                 this.axios.post('{{host_v1}}/auth/item/relation/' + parentRow.id, {
                     id: row.id,
-                    scope: this.currentScope
+                    scope: this.defaultScope
                 }).then((response) => {
                     if (response.data.code === '0') {
                         const children = parentRow.children || [];
@@ -271,7 +286,7 @@
                                 marginRight: '8px'
                             }
                         }),
-                        h('span', data.item.item_name)
+                        h('span', data.item_name)
                     ]),
                     h('span', {
                         style: {
@@ -308,7 +323,7 @@
                             },
                             on: {
                                 'on-ok': () => {
-                                    this.destroy(data);
+                                    this.destroy(root, node, data);
                                 }
                             }
                         }, [
@@ -324,21 +339,29 @@
                                 targetItems: this.targetItems,
                                 listStyle: this.listStyle,
                                 operations: this.operations,
-                                renderItem: this.renderItem
+                                renderItem: this.renderItem,
+                                items: this.itemTypes,
+                                itemDefaultValue: this.defaultItemValue
                             },
                             on: {
-                                onPopperShow: () => {
-                                    this.loadGroupItems(data);
+                                onPopperShow: (value) => {
+                                    this.loadGroupItems(value[0], this.defaultScope, data);
                                 },
                                 handleChange: (event) => {
                                     this.handleChange(event, data);
                                 },
-                                showAllData: () => {
-                                    this.loadGroupItems(data, 0);
+                                showAllData: (value) => {
+                                    this.loadGroupItems(value[0], this.defaultScope, data, 0);
+                                },
+                                showFilterData: (value) => {
+                                    this.loadGroupItems(value[0], this.defaultScope, data, 1);
+                                },
+                                selectItemChange: (value, selectedData) => {
+                                    this.loadGroupItems(value[0], value[1], data, 0);
                                 }
                             }
                         }, [
-                            h('Button', '权限')
+                            h('Button', '分配')
                         ])
                     ])
                 ]);
@@ -347,37 +370,38 @@
                 if (!(obj instanceof Object)) {
                     obj = JSON.parse(obj);
                 }
-                this.currentScope = obj.scope;
+                this.defaultScope = obj.scope;
                 this.currentType = obj.type;
             },
             getItemOriginal (data, filter = 1) {
                 this.dataItems = this.initDataItems = [];
                 this.axios.get('{{host_v1}}/auth/item/relation/original', {
                     params: {
-                        scope: this.currentScope,
+                        scope: this.defaultScope,
                         type: this.currentType,
-                        id: data.id,
+                        id: data.relation_id,
                         filter: filter
                     }
                 }).then(menus => {
                     this.dataItems = this.initDataItems = menus.data.data;
                 });
             },
-            loadGroupItems (data, filter = 1) {
+            loadGroupItems (itemType, scope, data, filter = 1) {
                 this.groupData = [];
                 this.targetItems = [];
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/group/original', {
                         params: {
-                            id: data.item.id,
+                            id: data.relation_id,
                             type: this.currentType,
                             filter: filter,
-                            scope: this.currentScope
+                            scope: scope,
+                            returnType: itemType
                         }
                     }),
                     this.axios.get('{{host_v1}}/auth/item/group/target', {
                         params: {
-                            id: data.item.id
+                            id: data.relation_id
                         }
                     })
                 ]).then(([items, targetItems]) => {
@@ -395,9 +419,9 @@
                 return item.item_name + ' - ' + item.item_desc;
             },
             handleChange (targetData, data) {
-                this.axios.post('{{host_v1}}/auth/item/group/' + data.item.id, {
+                this.axios.post('{{host_v1}}/auth/item/group/' + data.relation_id, {
                     ids: targetData,
-                    scope: this.currentScope
+                    scope: this.defaultScope
                 }).then(response => {
                     if (response.data.code === '0') {
                         this.targetItems = targetData;
@@ -405,7 +429,7 @@
                 });
             },
             loadItemRelation (type) {
-                this.initData(type);
+                this.initData(Number.parseInt(type));
             }
         },
         created () {

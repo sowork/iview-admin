@@ -1,12 +1,13 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../../styles/common.less';
 </style>
+
 <template>
     <div>
         <Card>
             <p slot="title">
                 <Icon type="android-remove"></Icon>
-                角色列表
+                年级管理
             </p>
             <div class="edittable-table-height-con">
                 <div class="margin-bottom-10">
@@ -15,22 +16,13 @@
                 <Table @on-row-dblclick="dblClick" :columns="editInlineColumns" :data="editInlineData" border ></Table>
             </div>
         </Card>
-        <Modal v-model="modal1" title="角色管理" @keydown.enter.native="httpRequest.next()">
-            <Form ref="formItem" :model="formItem" :rules="ruleInline" :label-width="80">
-                <FormItem label="角色代码" prop="item_name">
-                    <Input type="text" v-model="formItem.item_name" placeholder=""></Input>
+        <Modal :loading="loading" v-model="modal1" title="年级管理" @keydown.enter.native="httpRequest.next()">
+            <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
+                <FormItem label="年级名称" prop="grade_name">
+                    <Input v-model="formItem.grade_name" placeholder=""></Input>
                 </FormItem>
-                <FormItem label="角色名称" prop="item_desc">
-                    <Input type="text" v-model="formItem.item_desc" placeholder=""></Input>
-                </FormItem>
-                <FormItem label="权限配置" :label-width="0">
-                    <Scroll class="margin-top-20">
-                        <CheckboxGroup v-model="checkAllGroup">
-                            <Checkbox :label="permission.id" v-for="permission in permissions">
-                                <span v-text="permission.item_desc"></span>
-                            </Checkbox>
-                        </CheckboxGroup>
-                    </Scroll>
+                <FormItem label="排列顺序" prop="order">
+                    <Input v-model="formItem.order" placeholder=""></Input>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -40,24 +32,14 @@
         </Modal>
     </div>
 </template>
+
 <script>
     export default {
-        name: 'auth_role',
+        name: 'paper_index',
+        components: {
+        },
         data () {
             return {
-                formItem: {
-                    item_name: '',
-                    item_desc: ''
-                },
-                ruleInline: {
-                    item_name: [
-                        { required: true, message: '角色代码不能为空', trigger: 'blur' }
-                    ],
-                    item_desc: [
-                        { required: true, message: '角色名称不能为空', trigger: 'blur' },
-                        { type: 'string', max: 191, message: '字符串最多为191', trigger: 'blur' }
-                    ]
-                },
                 editInlineColumns: [
                     {
                         title: '序号',
@@ -65,14 +47,14 @@
                         key: 'id'
                     },
                     {
-                        title: '角色代码',
+                        title: '年级名称',
                         align: 'center',
-                        key: 'item_name'
+                        key: 'grade_name'
                     },
                     {
-                        title: '权限名称',
+                        title: '排列顺序',
                         align: 'center',
-                        key: 'item_desc'
+                        key: 'order'
                     },
                     {
                         title: '操作',
@@ -90,7 +72,6 @@
                                     on: {
                                         click: () => {
                                             this.dblClick(JSON.parse(JSON.stringify(this.editInlineData[params.index])), params.index);
-                                            this.setSelectPermissions(params.row);
                                         }
                                     }
                                 }, '编辑'),
@@ -119,25 +100,34 @@
                     }
                 ],
                 editInlineData: [],
+                total: 0,
+                page: 1,
+                number: 10,
                 modal1: false,
-                permissions: [],
-                checkAllGroup: []
+                loading: false,
+                httpRequest: '',
+                formItem: {
+                    grade_name: '',
+                    order: 0
+                },
+                ruleValidate: {
+                    grade_name: [
+                        {required: true, message: '试卷编码不能为空', trigger: 'blur'}
+                    ]
+                }
             };
         },
         methods: {
             initData () {
-                this.axios.get('{{host_v1}}/auth/roles').then(response => {
+                this.axios.get('{{host_v1}}/grade/index').then(response => {
                     this.editInlineData = response.data.data;
                 });
-                this.axios.get('{{host_v1}}/auth/permissions').then(response => {
-                    this.permissions = response.data.data;
-                });
             },
-            * actionModal (name, method, index) {
+            * actionModal (name, method, index = 0) {
                 if (method === 'store') {
                     this.reset(name);
                 }
-                yield this.modal1 = true;
+                yield (this.modal1 = true);
                 while (true) {
                     yield this.$refs[name].validate(valid => {
                         if (valid) {
@@ -146,39 +136,23 @@
                     });
                 }
             },
-            reset (name) {
-                this.$refs[name].resetFields();
-            },
             store () {
-                let permissionData = {
-                    'ids': this.checkAllGroup,
-                    '_method': 'put'
-                };
-                this.axios.post('{{host_v1}}/auth/store/role', this.formItem).then(response => {
-                    this.editInlineData.push(response.data.data);
-                    return this.axios.post('{{host_v1}}/auth/role/add/permissions/' + response.data.data.id, permissionData);
-                }).then(response => {
+                this.formItem._method = 'post';
+                this.axios.post('{{host_v1}}/grade', this.formItem).then(response => {
                     this.modal1 = false;
+                    this.editInlineData.push(response.data.data);
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
-                let permissionData = {
-                    'ids': this.checkAllGroup,
-                    '_method': 'put'
-                };
-                Promise.all([
-                    this.axios.post('{{host_v1}}/auth/update/role/' + this.formItem.id, this.formItem),
-                    this.axios.post('{{host_v1}}/auth/role/add/permissions/' + this.formItem.id, permissionData)
-                ]).then(([role, permissions]) => {
+                this.axios.post('{{host_v1}}/grade/' + this.formItem.id, this.formItem).then(response => {
                     this.modal1 = false;
-                    this.editInlineData.splice(index, 1, role.data.data);
-                    this.checkAllGroup = permissions.data.data;
+                    this.editInlineData.splice(index, 1, response.data.data);
                 });
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/auth/destroy/role/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/grade/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -187,10 +161,16 @@
                 this.httpRequest = this.actionModal('formItem', 'update', index);
                 this.httpRequest.next();
             },
-            setSelectPermissions (row) {
-                this.axios.get('{{host_v1}}/auth/role/permissions/' + row.id).then(response => {
-                    this.checkAllGroup = response.data.data;
-                });
+            reset (name) {
+                this.$refs[name].resetFields();
+            },
+            onChange (page, number) {
+                this.page = page;
+                this.initData();
+            },
+            onPageSizeChange (number) {
+                this.number = number;
+                this.initData();
             }
         },
         created () {

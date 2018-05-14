@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../../styles/common.less';
 </style>
 <template>
     <div>
@@ -11,6 +11,7 @@
             <div>
                 <div class="margin-bottom-10">
                     <Button type="ghost" @click="(httpRequest = actionModal('formItem', 'store')) && httpRequest.next()">添&nbsp;&nbsp;&nbsp;&nbsp;加</Button>
+                    <Button type="ghost" @click="refreshItem">刷新缓存</Button>
                 </div>
                 <Table @on-row-dblclick="dblClick" :columns="editInlineColumns" :data="editInlineData" border ></Table>
             </div>
@@ -23,15 +24,18 @@
                 <FormItem label="节点名称" prop="item_name">
                     <Input type="text" v-model="formItem.item_name" placeholder=""></Input>
                 </FormItem>
-                <FormItem label="节点归属" prop="scope">
-                    <Select v-model="formItem.scope" multiple>
-                        <Option v-for="item in itemScopes" :value="item.value" :key="item.value">{{ item.name }}</Option>
-                    </Select>
-                </FormItem>
                 <FormItem label="节点类型" prop="item_type">
-                    <Select v-model="formItem.item_type">
+                    <Select v-model.number="formItem.item_type">
                         <Option v-for="item in itemTypes" :value="item.value" :key="item.value">{{ item.name }}</Option>
                     </Select>
+                </FormItem>
+                <FormItem label="节点归属" prop="scope">
+                    <Select v-model="formItem.scope" multiple>
+                        <Option v-for="item in getItemScopes()" :value="item.value" :key="item.value + item.name">{{ item.name }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="额外数据" prop="other_data">
+                    <Input type="textarea" v-model="formItem.other_data" placeholder=""></Input>
                 </FormItem>
                 <FormItem label="节点描述" prop="item_desc">
                     <Input type="text" v-model="formItem.item_desc" placeholder=""></Input>
@@ -45,6 +49,8 @@
     </div>
 </template>
 <script>
+    import { Message } from 'iview';
+
     export default {
         name: 'auth_permission',
         data () {
@@ -52,26 +58,46 @@
                 httpRequest: '',
                 itemTypes: [
                     {
-                        value: 1,
-                        name: '权限'
+                        value: 3,
+                        name: '角色',
+                        scopes: [
+                            {
+                                value: 'admin',
+                                name: '后台角色'
+                            },
+                            {
+                                value: 'user',
+                                name: '前台角色'
+                            }
+                        ]
                     },
                     {
                         value: 2,
-                        name: '菜单'
+                        name: '菜单',
+                        scopes: [
+                            {
+                                value: 'admin',
+                                name: '后台菜单'
+                            },
+                            {
+                                value: 'adminTop',
+                                name: '后台顶部菜单'
+                            }
+                        ]
                     },
                     {
-                        value: 3,
-                        name: '角色'
-                    }
-                ],
-                itemScopes: [
-                    {
-                        value: 'admin',
-                        name: '管理员权限'
-                    },
-                    {
-                        value: 'user',
-                        name: '学校权限'
+                        value: 1,
+                        name: '权限',
+                        scopes: [
+                            {
+                                value: 'admin',
+                                name: '后台权限'
+                            },
+                            {
+                                value: 'user',
+                                name: '前台权限'
+                            }
+                        ]
                     }
                 ],
                 editInlineColumns: [
@@ -95,10 +121,14 @@
                         align: 'center',
                         render: (h, params) => {
                             let scopeStr = [];
-                            for (let item of this.itemScopes) {
-                                for (let scope of params.row.scope.split(',')) {
-                                    if (item.value === scope) {
-                                        scopeStr.push(item.name);
+                            for (let item of this.itemTypes) {
+                                if (item.value === Number.parseInt(params.row.item_type)) { // 类型对应
+                                    for (let itemScope of item.scopes) {
+                                        for (let scope of params.row.scope.split(',')) {
+                                            if (itemScope.value === scope) {
+                                                scopeStr.push(itemScope.name);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -110,10 +140,10 @@
                         align: 'center',
                         render: (h, params) => {
                             const row = params.row;
-                            const color = row.item_type === 1 ? 'blue' : row.item_type === 2 ? 'green' : 'red';
+                            const color = Number.parseInt(row.item_type) === 1 ? 'blue' : Number.parseInt(row.item_type) === 2 ? 'green' : 'red';
                             let text = '';
                             for (let item of this.itemTypes) {
-                                if (item.value === params.row.item_type) {
+                                if (item.value === Number.parseInt(params.row.item_type)) {
                                     text = item.name;
                                 }
                             }
@@ -122,14 +152,6 @@
                                     props: {
                                         type: 'dot',
                                         color: color
-                                    },
-                                    nativeOn: {
-                                        click: () => {
-                                            this.$router.push({
-                                                name: 'item.group',
-                                                query: {data: JSON.stringify(params.row)}
-                                            });
-                                        }
                                     }
                                 }, text)
                             ]);
@@ -148,20 +170,6 @@
                         width: 200,
                         render: (h, params) => {
                             return h('div', [
-                                h('Button', {
-                                    props: {
-                                        type: 'text',
-                                        size: 'small'
-                                    },
-                                    on: {
-                                        click: () => {
-                                            this.$router.push({
-                                                name: 'item.relation',
-                                                query: {data: JSON.stringify(params.row)}
-                                            });
-                                        }
-                                    }
-                                }, '节点关联'),
                                 h('Button', {
                                     props: {
                                         type: 'text',
@@ -203,7 +211,8 @@
                     item_name: '',
                     item_desc: '',
                     item_type: '',
-                    scope: []
+                    scope: [],
+                    other_data: ''
                 },
                 ruleInline: {
                     item_code: [
@@ -213,7 +222,6 @@
                         { required: true, message: '节点名称不能为空', trigger: 'blur' }
                     ],
                     item_desc: [
-                        { required: true, message: '节点描述不能为空', trigger: 'blur' },
                         { type: 'string', max: 191, message: '字符串最多为191', trigger: 'blur' }
                     ],
                     scope: [
@@ -273,6 +281,20 @@
                 this.formItem = row;
                 this.httpRequest = this.actionModal('formItem', 'update', index);
                 this.httpRequest.next();
+            },
+            getItemScopes () {
+                for (let item of this.itemTypes) {
+                    if (item.value === this.formItem.item_type) {
+                        return item.scopes;
+                    }
+                }
+            },
+            refreshItem () {
+                this.axios.get('{{host_v1}}/auth/item/refresh/cache').then(response => {
+                    if (response.data.code === '0') {
+                        Message.success(response.data.msg);
+                    }
+                });
             }
         },
         created () {
