@@ -21,19 +21,19 @@
         </Card>
         <Modal :loading="loading" v-model="modal1" title="前台用户" @keydown.enter.native="httpRequest.next()">
             <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
-                <FormItem label="学校名称" prop="school_id">
-                    <Select v-model="formItem.school_id">
-                        <Option v-for="item in schools" :value="item.id" :key="item.id">{{ item.school_name }}</Option>
-                    </Select>
-                </FormItem>
-                <FormItem label="用户姓名" prop="user_name">
-                    <Input v-model="formItem.user_name" placeholder=""></Input>
-                </FormItem>
                 <FormItem label="账户名称" prop="user_email">
                     <Input v-model="formItem.user_email" placeholder=""></Input>
                 </FormItem>
                 <FormItem label="账户密码" prop="password">
-                    <Input type="password" v-model="formItem.password" placeholder=""></Input>
+                    <Input type="password" v-model="formItem.password" placeholder="不填默认为123456"></Input>
+                </FormItem>
+                <FormItem label="用户姓名" prop="user_name">
+                    <Input v-model="formItem.user_name" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="学校名称" prop="school_id">
+                    <Select v-model="formItem.school_id">
+                        <Option v-for="item in schools" :value="item.id" :key="item.id">{{ item.school_name }}</Option>
+                    </Select>
                 </FormItem>
                 <FormItem label="用户电话" prop="user_tel">
                     <Input v-model="formItem.user_tel" placeholder=""></Input>
@@ -43,7 +43,7 @@
                         <Option v-for="item in sexTypes" :value="item.value" :key="item.value">{{ item.name }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="用户生日" prop="user_birthday">
+                <FormItem label="出生日期" prop="user_birthday">
                     <DatePicker @on-change="parseDate" format="yyyy-MM-dd HH:mm:ss" :value="formItem.user_birthday" type="date" placeholder="选择日期" style="width: 200px"></DatePicker>
                 </FormItem>
             </Form>
@@ -67,7 +67,7 @@
         data () {
             const validePhone = (rule, value, callback) => {
                 var re = /^1[0-9]{10}$/;
-                if (!re.test(value)) {
+                if (value !== null && !re.test(value)) {
                     callback(new Error('请输入正确格式的手机号'));
                 } else {
                     callback();
@@ -217,15 +217,12 @@
                     user_name: '',
                     user_email: '',
                     password: '',
-                    user_birthday: '',
-                    user_tel: '',
+                    user_birthday: null,
+                    user_tel: null,
                     user_sex: '',
-                    school_id: ''
+                    school_id: null
                 },
                 ruleValidate: {
-                    user_name: [
-                        {required: true, type: 'string', message: '用户姓名不能为空', trigger: 'blur'}
-                    ],
                     user_email: [
                         {required: true, type: 'string', message: '账户名称不能为空', trigger: 'blur'}
                     ],
@@ -234,14 +231,7 @@
                         { max: 32, message: '最多输入32个字符', trigger: 'blur' }
                     ],
                     user_tel: [
-                        {required: true, type: 'string', message: '手机号码不能为空', trigger: 'blur'},
                         {validator: validePhone}
-                    ],
-                    user_sex: [
-                        {required: true, type: 'string', message: '用户性别不能为空', trigger: 'change'}
-                    ],
-                    school_id: [
-                        {required: true, type: 'number', message: '请选择归属学校', trigger: 'blur'}
                     ]
                 },
                 roles: [],
@@ -341,26 +331,16 @@
             },
             store () {
                 this.formItem._method = 'post';
-                let roleData = {
-                    'ids': this.checkAllGroup,
-                    _method: 'put'
-                };
                 this.axios.post('{{host_v1}}/user', this.formItem).then(response => {
                     this.editInlineData.push(response.data.data);
-                    return this.axios.post('{{host_v1}}/user/add/roles/' + response.data.data.id, roleData);
                 }).then(response => {
                     this.modal1 = false;
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
-                let roleData = {
-                    'ids': this.checkAllGroup,
-                    '_method': 'put'
-                };
                 Promise.all([
-                    this.axios.post('{{host_v1}}/user/' + this.formItem.id, this.formItem),
-                    this.axios.post('{{host_v1}}/user/add/roles/' + this.formItem.id, roleData)
+                    this.axios.post('{{host_v1}}/user/' + this.formItem.id, this.formItem)
                 ]).then(([$user, $roles]) => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, $user.data.data);

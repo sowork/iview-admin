@@ -2,5 +2,5 @@ src/vendors
 src/libs/table2excel.js
 build
 router.js
-src/views/router.component.js
+src/router/router.component.js
 src/views/my-components/text-editor/tinymce

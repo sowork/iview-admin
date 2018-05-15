@@ -66,18 +66,24 @@ export default {
     },
     methods: {
         handleSubmit () {
-            let loginUrl = '';
+            let loginUrl = '{{host_v1}}/admin/login';
+            let provider = '';
+            let appID = 0;
             if (this.status === 1) {
-                loginUrl = '{{host_v1}}/user/login';
+                provider = 'users';
+                appID = this.school_appId;
             } else {
-                loginUrl = '{{host_v1}}/admin/login';
+                provider = 'admins';
+                appID = this.admin_appId;
             }
             this.$refs.loginForm.validate((valid) => {
                 if (valid) {
                     iView.LoadingBar.start();
                     this.axios.post(loginUrl, {
                         username: this.form.userName,
-                        password: this.form.password
+                        password: this.form.password,
+                        provider: provider,
+                        client_id: appID
                     }).then((response) => {
                         if (response.data.access_token) {
                             Cookies.set('user', this.form.userName);

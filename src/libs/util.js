@@ -278,7 +278,7 @@ util.parseMenuTree = function (menus) {
     let tree = [];
     let temp = {tree: {}};
     for (let item of menus) {
-        if (item.other_data !== undefined && item.other_data !== ''){
+        if (item.other_data !== undefined && item.other_data !== '') {
             let data = JSON.parse(item.other_data);
             temp['tree'][item.relation_id] = {
                 path: data.path,

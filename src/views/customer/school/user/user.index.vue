@@ -21,14 +21,14 @@
         </Card>
         <Modal :loading="loading" v-model="modal1" title="前台用户" @keydown.enter.native="httpRequest.next()">
             <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
-                <FormItem label="用户姓名" prop="user_name">
-                    <Input v-model="formItem.user_name" placeholder=""></Input>
-                </FormItem>
                 <FormItem label="账户名称" prop="user_email">
                     <Input v-model="formItem.user_email" placeholder=""></Input>
                 </FormItem>
                 <FormItem label="账户密码" prop="password">
                     <Input type="password" v-model="formItem.password" placeholder="不填默认为123456"></Input>
+                </FormItem>
+                <FormItem label="用户姓名" prop="user_name">
+                    <Input v-model="formItem.user_name" placeholder=""></Input>
                 </FormItem>
                 <FormItem label="用户电话" prop="user_tel">
                     <Input v-model="formItem.user_tel" placeholder=""></Input>
@@ -38,7 +38,7 @@
                         <Option v-for="item in sexTypes" :value="item.value" :key="item.value">{{ item.name }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="用户生日" prop="user_birthday">
+                <FormItem label="出生日期" prop="user_birthday">
                     <DatePicker @on-change="parseDate" format="yyyy-MM-dd HH:mm:ss" :value="formItem.user_birthday" type="date" placeholder="选择日期" style="width: 200px"></DatePicker>
                 </FormItem>
             </Form>
@@ -205,9 +205,6 @@
                     user_sex: ''
                 },
                 ruleValidate: {
-                    user_name: [
-                        {required: true, type: 'string', message: '用户姓名不能为空', trigger: 'blur'}
-                    ],
                     user_email: [
                         {required: true, type: 'string', message: '账户名称不能为空', trigger: 'blur'}
                     ],
