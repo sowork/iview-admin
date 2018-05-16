@@ -357,7 +357,7 @@
                                     this.loadGroupItems(value[0], this.defaultScope, data, 1);
                                 },
                                 selectItemChange: (value, selectedData) => {
-                                    this.loadGroupItems(value[0], value[1], data, 0);
+                                    this.loadGroupItems(value[0], value[1], data, 1);
                                 }
                             }
                         }, [
@@ -392,7 +392,7 @@
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/group/original', {
                         params: {
-                            id: data.relation_id,
+                            id: data.id,
                             type: this.currentType,
                             filter: filter,
                             scope: scope,
@@ -401,7 +401,7 @@
                     }),
                     this.axios.get('{{host_v1}}/auth/item/group/target', {
                         params: {
-                            id: data.relation_id
+                            id: data.id
                         }
                     })
                 ]).then(([items, targetItems]) => {
@@ -419,7 +419,7 @@
                 return item.item_name + ' - ' + item.item_desc;
             },
             handleChange (targetData, data) {
-                this.axios.post('{{host_v1}}/auth/item/group/' + data.relation_id, {
+                this.axios.post('{{host_v1}}/auth/item/group/' + data.id, {
                     ids: targetData,
                     scope: this.defaultScope
                 }).then(response => {

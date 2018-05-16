@@ -7,7 +7,7 @@
                         <div style="padding-bottom: 15px">
                             <Button type="ghost" @click="showFilterData">LoadFilter</Button>
                             <Button type="ghost" @click="showAllData">LoadAll</Button>
-                            <Cascader :data="items" :value="itemDefaultValue" @on-change="selectItemChange" style="width: 250px; display: inline-block"></Cascader>
+                            <Cascader ref="tt" :data="items" v-model="itemValueCopy" @on-change="selectItemChange" style="width: 250px; display: inline-block"></Cascader>
                         </div>
                         <Transfer
                                 :data="groupData"
@@ -69,16 +69,16 @@
                 this.$emit('handleChange', targetData);
             },
             onPopperShow () {
-                this.$emit('onPopperShow', this.itemDefaultValue);
+                this.$emit('onPopperShow', this.itemValueCopy);
             },
             showAllData () {
-                this.$emit('showAllData', this.itemDefaultValue);
+                this.$emit('showAllData', this.itemValueCopy);
             },
             selectItemChange (value, selectedData) {
                 this.$emit('selectItemChange', value, selectedData);
             },
             showFilterData () {
-                this.$emit('showFilterData', this.itemDefaultValue);
+                this.$emit('showFilterData', this.itemValueCopy);
             }
         }
     };
