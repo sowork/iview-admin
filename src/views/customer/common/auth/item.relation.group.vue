@@ -164,7 +164,7 @@
             topMenu () {
                 return {
                     title: '添加顶级节点',
-                    id: 0,
+                    relation_id: 0,
                     expand: true,
                     render: (h, {root, node, data}) => {
                         return h('span', {
@@ -253,7 +253,7 @@
                 this.dataItems = res;
             },
             store (row, index, parentRow) {
-                this.axios.post('{{host_v1}}/auth/item/relation/' + parentRow.id, {
+                this.axios.post('{{host_v1}}/auth/item/relation/' + parentRow.relation_id, {
                     id: row.id,
                     scope: this.defaultScope
                 }).then((response) => {

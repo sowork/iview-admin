@@ -70,7 +70,17 @@ export const otherRouter = {
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export let appRouter = [
-
+    {
+        path: '/item',
+        icon: 'key',
+        name: 'authentication.manage',
+        title: '权限管理',
+        component: Main,
+        children: [
+            { path: 'auth/items', title: '权限列表', name: 'authentication.list', component: () => import('@/views/customer/common/auth/item.index.vue') },
+            { path: 'auth/menus', title: '权限关联', name: 'authentication.union', component: () => import('@/views/customer/common/auth/item.relation.group.vue') },
+        ]
+    },
     {
         path: '/school/manage',
         icon: 'key',
@@ -87,17 +97,6 @@ export let appRouter = [
             // { path: 'quota/index', title: '指标管理', name: 'quota.index', component: () => import('@/views/customer/quota/school/quota.index.vue') },
         ]
     },
-    // {
-    //     path: '/item',
-    //     icon: 'key',
-    //     name: 'item',
-    //     title: '授权管理',
-    //     component: Main,
-    //     children: [
-    //         { path: 'auth/items', title: '权限列表', name: 'item.index', component: () => import('@/views/customer/auth/item.index.vue') },
-    //         { path: 'auth/menus', title: '权限关联', name: 'item.menu', component: () => import('@/views/customer/auth/item.relation.group.vue') },
-    //     ]
-    // },
     // {
     //     path: '/user',
     //     icon: 'key',

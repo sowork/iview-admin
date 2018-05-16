@@ -280,13 +280,13 @@ util.parseMenuTree = function (menus) {
     for (let item of menus) {
         if (item.other_data !== undefined && item.other_data !== '') {
             let data = JSON.parse(item.other_data);
-            temp['tree'][item.relation_id] = {
+            temp['tree'][item.id] = {
                 path: data.path,
                 icon: data.icon,
                 component: routerList[item.item_code],
                 title: item.item_name,
                 parent_id: item.parent_id,
-                relation_id: item.relation_id,
+                id: item.id,
                 name: item.item_code
             };
         }
