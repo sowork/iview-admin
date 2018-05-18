@@ -13,7 +13,9 @@
                     <TabPane :label="type.label" :name="'' + type.value" v-for="(type, index) in itemTypes">
                         <Tabs ref="treeGroups" @on-click="loadItems" style="height: 700px;">
                             <TabPane :label="scope.label" :name="JSON.stringify({scope: scope.value, type: type.value})" v-for="(scope, index) in type.children">
-                                <Tree :data="tree.data" :render="renderContent" style="width:500px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value"></Tree>
+                                <Scroll height="600">
+                                    <Tree :data="tree.data" :render="renderContent" style="width:500px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value"></Tree>
+                                </Scroll>
                             </TabPane>
                         </Tabs>
                     </TabPane>

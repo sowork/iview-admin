@@ -3,6 +3,10 @@ import Cookies from 'js-cookie';
 import env from '../../build/env';
 import { Message } from 'iview';
 
+/**
+ * 配置后台访问接口host地址
+ * @type {{development: {host: string, host_api: string, host_v1: string}, production: {host: string, host_api: string, host_v1: string}}}
+ */
 const apiDomain = {
     'development': {
         'host': 'http://127.0.0.1',
@@ -10,9 +14,9 @@ const apiDomain = {
         'host_v1': 'http://127.0.0.1/api/v1'
     },
     'production': {
-        'host': 'http://127.0.0.1:80',
-        'host_api': 'http://127.0.0.1:80/api',
-        'host_v1': 'http://127.0.0.1:80/api/v1'
+        'host': 'http://192.168.1.21:8803',
+        'host_api': 'http://192.168.1.21:8803/api',
+        'host_v1': 'http://192.168.1.21:8803/api/v1'
     }
 };
 

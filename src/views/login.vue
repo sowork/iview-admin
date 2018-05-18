@@ -68,13 +68,10 @@ export default {
         handleSubmit () {
             let loginUrl = '{{host_v1}}/admin/login';
             let provider = '';
-            let appID = 0;
             if (this.status === 1) {
                 provider = 'users';
-                appID = this.school_appId;
             } else {
                 provider = 'admins';
-                appID = this.admin_appId;
             }
             this.$refs.loginForm.validate((valid) => {
                 if (valid) {
@@ -82,8 +79,7 @@ export default {
                     this.axios.post(loginUrl, {
                         username: this.form.userName,
                         password: this.form.password,
-                        provider: provider,
-                        client_id: appID
+                        provider: provider
                     }).then((response) => {
                         if (response.data.access_token) {
                             Cookies.set('user', this.form.userName);

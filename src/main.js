@@ -30,9 +30,6 @@ Vue.directive('permission', {
     }
 });
 
-Vue.prototype.school_appId = 9; // 打包前配置：学校端appid
-Vue.prototype.admin_appId = 10; // 打包前配置：管理员端appid
-
 new Vue({
     el: '#app',
     router: router,

@@ -285,7 +285,7 @@
                 ];
 
                 Promise.all([
-                    this.axios.get('{{host_v1}}/school/users', {
+                    this.axios.get('{{host_v1}}/school/teachers', {
                         params: {
                             'page': this.page,
                             'number': this.number
@@ -311,7 +311,7 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{host_v1}}/school/user/store', this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/school/teacher/store', this.formItem).then(response => {
                     this.editInlineData.push(response.data.data);
                 }).then(response => {
                     this.modal1 = false;
@@ -320,7 +320,7 @@
             update (index) {
                 this.formItem._method = 'put';
                 Promise.all([
-                    this.axios.post('{{host_v1}}/school/user/update/' + this.formItem.id, this.formItem)
+                    this.axios.post('{{host_v1}}/school/teacher/update/' + this.formItem.id, this.formItem)
                 ]).then(([$user, $roles]) => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, $user.data.data);
@@ -328,7 +328,7 @@
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/school/user/destroy/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{host_v1}}/school/teacher/destroy/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },

@@ -70,33 +70,33 @@ export const otherRouter = {
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export let appRouter = [
-    {
-        path: '/item',
-        icon: 'key',
-        name: 'authentication.manage',
-        title: '权限管理',
-        component: Main,
-        children: [
-            { path: 'auth/items', title: '权限列表', name: 'authentication.list', component: () => import('@/views/customer/common/auth/item.index.vue') },
-            { path: 'auth/menus', title: '权限关联', name: 'authentication.union', component: () => import('@/views/customer/common/auth/item.relation.group.vue') },
-        ]
-    },
-    {
-        path: '/school/manage',
-        icon: 'key',
-        name: 'manage',
-        title: '学校管理',
-        component: Main,
-        children: [
-            { path: 'grade/index', title: '年级列表', name: 'grade.index', component: () => import('@/views/customer/school/grade/grade.index.vue') },
-            { path: 'class/index', title: '班级列表', name: 'class.index', component: () => import('@/views/customer/school/class/class.index.vue') },
-            { path: 'student/index', title: '学生列表', name: 'student.index', component: () => import('@/views/customer/school/student/student.index.vue') },
-            { path: 'user/index', title: '用户列表', name: 'school.user.index', component: () => import('@/views/customer/school/user/user.index.vue') },
-            // { path: 'paper/index', title: '试卷管理', access: ['paper.index'], name: 'paper.index', component: () => import('@/views/customer/school/paper/paper.index.vue') },
-            // { path: 'template/index', title: '模板管理', name: 'template.index', component: () => import('@/views/customer/school/template/template.index.vue') },
-            // { path: 'quota/index', title: '指标管理', name: 'quota.index', component: () => import('@/views/customer/quota/school/quota.index.vue') },
-        ]
-    },
+    // {
+    //     path: '/item',
+    //     icon: 'key',
+    //     name: 'authentication.manage',
+    //     title: '权限管理',
+    //     component: Main,
+    //     children: [
+    //         { path: 'auth/items', title: '权限列表', name: 'authentication.list', component: () => import('@/views/customer/common/auth/item.index.vue') },
+    //         { path: 'auth/menus', title: '权限关联', name: 'authentication.union', component: () => import('@/views/customer/common/auth/item.relation.group.vue') },
+    //     ]
+    // },
+    // {
+    //     path: '/school/manage',
+    //     icon: 'key',
+    //     name: 'school.manage',
+    //     title: '学校管理',
+    //     component: Main,
+    //     children: [
+    //         { path: 'grade/index', title: '年级列表', name: 'school.grade.index', component: () => import('@/views/customer/school/grade/grade.index.vue') },
+    //         { path: 'class/index', title: '班级列表', name: 'school.class.index', component: () => import('@/views/customer/school/class/class.index.vue') },
+    //         { path: 'student/index', title: '学生列表', name: 'school.student.index', component: () => import('@/views/customer/school/student/student.index.vue') },
+    //         { path: 'teacher/index', title: '教师列表', name: 'school.teacher.index', component: () => import('@/views/customer/school/teacher/teacher.index.vue') },
+    //         // { path: 'paper/index', title: '试卷管理', access: ['paper.index'], name: 'paper.index', component: () => import('@/views/customer/school/paper/paper.index.vue') },
+    //         // { path: 'template/index', title: '模板管理', name: 'template.index', component: () => import('@/views/customer/school/template/template.index.vue') },
+    //         // { path: 'quota/index', title: '指标管理', name: 'quota.index', component: () => import('@/views/customer/quota/school/quota.index.vue') },
+    //     ]
+    // },
     // {
     //     path: '/user',
     //     icon: 'key',

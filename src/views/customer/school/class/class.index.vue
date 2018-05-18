@@ -159,7 +159,7 @@
         methods: {
             initData () {
                 Promise.all([
-                    this.axios.get('{{host_v1}}/classes'),
+                    this.axios.get('{{host_v1}}/classes/index'),
                     this.axios.get('{{host_v1}}/grade/index'),
                     this.axios.get('{{host_v1}}/course')
                 ]).then(([templates, grades, courses]) => {
