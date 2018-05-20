@@ -45,6 +45,7 @@
 <script>
 import iView from 'iview';
 import Cookies from 'js-cookie';
+import app from "../store/modules/app";
 
 export default {
     data () {
@@ -68,10 +69,13 @@ export default {
         handleSubmit () {
             let loginUrl = '{{host_v1}}/admin/login';
             let provider = '';
+            let appId = 0;
             if (this.status === 1) {
                 provider = 'users';
+                appId = 9;
             } else {
                 provider = 'admins';
+                appId = 10;
             }
             this.$refs.loginForm.validate((valid) => {
                 if (valid) {
@@ -79,7 +83,8 @@ export default {
                     this.axios.post(loginUrl, {
                         username: this.form.userName,
                         password: this.form.password,
-                        provider: provider
+                        provider: provider,
+                        appId: appId
                     }).then((response) => {
                         if (response.data.access_token) {
                             Cookies.set('user', this.form.userName);

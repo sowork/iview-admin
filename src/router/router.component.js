@@ -16,5 +16,5 @@ export const routerList = {
     'school.grade.index': () => import('@/views/customer/school/grade/grade.index.vue'),
     'school.class.index': () => import('@/views/customer/school/class/class.index.vue'),
     'school.student.index': () => import('@/views/customer/school/student/student.index.vue'),
-    'school.teacher.index': () => import('@/views/customer/school/teacher/teacher.index.vue'),
+    'school.teachers': () => import('@/views/customer/school/teacher/teacher.index.vue'),
 };
