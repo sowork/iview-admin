@@ -66,7 +66,7 @@
         },
         methods: {
             handleChange (targetData) {
-                this.$emit('handleChange', targetData);
+                this.$emit('handleChange', targetData, this.itemValueCopy);
             },
             onPopperShow () {
                 this.$emit('onPopperShow', this.itemValueCopy);

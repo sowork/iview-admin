@@ -123,8 +123,8 @@
                                         onPopperShow: (value) => {
                                             this.loadGroupItems(value[0], value[1], params.row);
                                         },
-                                        handleChange: (event) => {
-                                            this.handleChange(event, params.row);
+                                        handleChange: (event, value) => {
+                                            this.handleChange(event, value, params.row);
                                         },
                                         showAllData: (value) => {
                                             this.loadGroupItems(value[0], value[1], params.row, 0);
@@ -133,7 +133,7 @@
                                             this.loadGroupItems(value[0], value[1], params.row);
                                         },
                                         selectItemChange: (value, selectedData) => {
-                                            this.loadGroupItems(value[0], value[1], params.row);
+                                            this.loadGroupItems(value[0], value[1], params.row, 0);
                                         }
                                     }
                                 }, [
@@ -367,7 +367,9 @@
                     this.axios.get('{{host_v1}}/auth/item/assignment/target', {
                         params: {
                             id: data.id,
-                            provider: 'users'
+                            provider: 'users',
+                            scope: scope,
+                            type: itemType
                         }
                     })
                 ]).then(([items, targetItems]) => {
@@ -384,10 +386,12 @@
             renderItem (item) {
                 return item.item_name + ' - ' + item.item_desc;
             },
-            handleChange (targetData, data) {
+            handleChange (targetData, value, data) {
                 this.axios.post('{{host_v1}}/auth/item/assignment/' + data.id, {
                     ids: targetData,
-                    provider: 'users'
+                    provider: 'users',
+                    type: value[0],
+                    scope: value[1]
                 }).then(response => {
                     if (response.data.code === '0') {
                         this.targetItems = targetData;
