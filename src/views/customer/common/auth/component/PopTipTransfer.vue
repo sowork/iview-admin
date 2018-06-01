@@ -4,11 +4,13 @@
             <Row :gutter="10">
                 <Col span="24">
                     <Card>
-                        <div style="padding-bottom: 15px">
-                            <Button type="ghost" @click="showFilterData">LoadFilter</Button>
-                            <Button type="ghost" @click="showAllData">LoadAll</Button>
-                            <Cascader ref="tt" :data="items" v-model="itemValueCopy" @on-change="selectItemChange" style="width: 250px; display: inline-block"></Cascader>
-                        </div>
+                        <slot name="head">
+                            <div style="padding-bottom: 15px">
+                                <Button type="ghost" @click="showFilterData">LoadFilter</Button>
+                                <Button type="ghost" @click="showAllData">LoadAll</Button>
+                                <Cascader ref="tt" :data="items" v-model="itemValueCopy" @on-change="selectItemChange" style="width: 250px; display: inline-block"></Cascader>
+                            </div>
+                        </slot>
                         <Transfer
                                 :data="groupData"
                                 :target-keys="targetItems"

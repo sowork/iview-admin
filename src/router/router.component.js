@@ -13,8 +13,9 @@ export const routerList = {
     'client.list': () => import('@/views/customer/common/setting/client.index.vue'),
 
     'school.manage': () => import('@/views/Main.vue'),
-    'school.grade.index': () => import('@/views/customer/school/grade/grade.index.vue'),
-    'school.class.index': () => import('@/views/customer/school/class/class.index.vue'),
-    'school.student.index': () => import('@/views/customer/school/student/student.index.vue'),
+    // 'school.grades': () => import('@/views/customer/school/grade/grade.index.vue'),
+    'school.classes': () => import('@/views/customer/school/class/class.index.vue'),
+    'school.students': () => import('@/views/customer/school/student/student.index.vue'),
     'school.teachers': () => import('@/views/customer/school/teacher/teacher.index.vue'),
+    'school.lessons': () => import('@/views/customer/school/lesson/class.attention.vue'),
 };

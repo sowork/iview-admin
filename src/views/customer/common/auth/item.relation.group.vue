@@ -14,7 +14,7 @@
                         <Tabs ref="treeGroups" @on-click="loadItems" style="height: 700px;">
                             <TabPane :label="scope.label" :name="JSON.stringify({scope: scope.value, type: type.value})" v-for="(scope, index) in type.children">
                                 <Scroll height="600">
-                                    <Tree :data="tree.data" :render="renderContent" style="width:500px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value"></Tree>
+                                    <Tree :data="tree.data" :render="renderContent" style="width:700px;" v-for="tree in treeData" v-if="tree['scope'] === scope.value"></Tree>
                                 </Scroll>
                             </TabPane>
                         </Tabs>
@@ -49,12 +49,12 @@
                         level: 3,
                         children: [
                             {
-                                value: 'admin',
-                                label: '后台角色'
+                                value: 'admin_roles',
+                                label: '智慧云端角色'
                             },
                             {
-                                value: 'user',
-                                label: '前台角色'
+                                value: 'school_roles',
+                                label: '学校端角色'
                             }
                         ]
                     },
@@ -64,12 +64,16 @@
                         level: 2,
                         children: [
                             {
-                                value: 'admin',
-                                label: '后台菜单'
+                                value: 'admin_menus',
+                                label: '智慧云端菜单'
                             },
                             {
-                                value: 'adminTop',
-                                label: '后台顶部菜单'
+                                value: 'admin_top_menus',
+                                label: '智慧云端顶部菜单'
+                            },
+                            {
+                                value: 'school_menus',
+                                label: '学校端菜单'
                             }
                         ]
                     },
@@ -79,12 +83,12 @@
                         level: 1,
                         children: [
                             {
-                                value: 'admin',
-                                label: '后台权限'
+                                value: 'admin_permissions',
+                                label: '智慧云端权限'
                             },
                             {
-                                value: 'user',
-                                label: '前台权限'
+                                value: 'school_permissions',
+                                label: '学校端权限'
                             }
                         ]
                     }
@@ -131,9 +135,11 @@
                         if (typeItem.value === type) {
                             this.currentItem = typeItem;
                             this.defaultItemValue = [
-                                this.currentItem.value - 1 > 0 ? this.currentItem.value - 1 : 1,
-                                typeItem['children'][0].value
+                                this.currentItem.value - 1 > 0 ? this.currentItem.value - 1 : 1
                             ];
+                        }
+                        if (typeItem.value === this.defaultItemValue[0]) {
+                            this.defaultItemValue[1] = typeItem['children'][0].value;
                         }
                         if (typeItem.value === Number.parseInt(type)) {
                             for (let scope of typeItem.children) {
@@ -347,16 +353,16 @@
                             },
                             on: {
                                 onPopperShow: (value) => {
-                                    this.loadGroupItems(value[0], this.defaultScope, data);
+                                    this.loadGroupItems(value[0], value[1], data);
                                 },
                                 handleChange: (event) => {
                                     this.handleChange(event, data);
                                 },
                                 showAllData: (value) => {
-                                    this.loadGroupItems(value[0], this.defaultScope, data, 0);
+                                    this.loadGroupItems(value[0], value[1], data, 0);
                                 },
                                 showFilterData: (value) => {
-                                    this.loadGroupItems(value[0], this.defaultScope, data, 1);
+                                    this.loadGroupItems(value[0], value[1], data, 1);
                                 },
                                 selectItemChange: (value, selectedData) => {
                                     this.loadGroupItems(value[0], value[1], data, 1);
@@ -397,7 +403,8 @@
                             id: data.id,
                             type: this.currentType,
                             filter: filter,
-                            scope: scope,
+                            scope: this.defaultScope,
+                            returnScope: scope,
                             returnType: itemType
                         }
                     }),

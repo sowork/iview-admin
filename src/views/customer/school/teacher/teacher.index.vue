@@ -53,6 +53,7 @@
 <script>
     import PopTipTransfer from '../../common/auth/component/PopTipTransfer.vue';
     import Vue from 'vue';
+    import util from '@/libs/util';
 
     Vue.component('PopTipTransfer', PopTipTransfer);
     export default {
@@ -105,7 +106,7 @@
                         key: 'action',
                         align: 'center',
                         fixed: 'right',
-                        width: 200,
+                        width: 350,
                         render: (h, params) => {
                             return h('div', [
                                 h('PopTipTransfer', {
@@ -117,8 +118,14 @@
                                         renderItem: this.renderItem,
                                         items: this.itemTypes,
                                         itemDefaultValue: this.defaultItemValue,
-                                        placement: 'left'
+                                        placement: 'left',
                                     },
+                                    directives: [
+                                        {
+                                            name: 'permission',
+                                            value: 'user.show.auth.button'
+                                        }
+                                    ],
                                     on: {
                                         onPopperShow: (value) => {
                                             this.loadGroupItems(value[0], value[1], params.row);
@@ -143,6 +150,77 @@
                                             size: 'small'
                                         }
                                     }, '授权')
+                                ]),
+                                h('PopTipTransfer', {
+                                    props: {
+                                        groupData: this.course.coursesData,
+                                        targetItems: this.course.targetCoursesData,
+                                        listStyle: this.listStyle,
+                                        operations: this.operations,
+                                        renderItem: this.renderCourseItem,
+                                        placement: 'left'
+                                    },
+                                    on: {
+                                        onPopperShow: (value) => {
+                                            this.axios.get('{{host_v1}}/user/courses', {
+                                                params: {
+                                                    user_id: params.row.id
+                                                }
+                                            }).then(response => {
+                                                this.course.targetCoursesData = [];
+                                                for (let course of response.data.data) {
+                                                    this.course.targetCoursesData.push(course.id);
+                                                }
+                                            });
+                                        },
+                                        handleChange: (event, value) => {
+                                            this.batchStoreCourses(event, value, params.row);
+                                        }
+                                    }
+                                }, [
+                                    h('Div', {
+                                        slot: 'head'
+                                    }),
+                                    h('Button', {
+                                        props: {
+                                            type: 'text',
+                                            size: 'small'
+                                        }
+                                    }, '课程管理')
+                                ]),
+                                h('PopTipTransfer', {
+                                    props: {
+                                        groupData: this.banji.classesData,
+                                        targetItems: this.banji.targetClassesData,
+                                        listStyle: this.listStyle,
+                                        operations: this.operations,
+                                        renderItem: this.renderClassItem,
+                                        placement: 'left'
+                                    },
+                                    on: {
+                                        onPopperShow: (value) => {
+                                            this.axios.get('{{host_v1}}/user/classes', {
+                                                params: {
+                                                    user_id: params.row.id
+                                                }
+                                            }).then(response => {
+                                                this.banji.targetClassesData = [];
+                                                for (let banji of response.data.data) {
+                                                    this.banji.targetClassesData.push(banji.id);
+                                                }
+                                            });
+                                        },
+                                        handleChange: (event, value) => {
+                                            this.batchStoreClasses(event, value, params.row);
+                                        }
+                                    }
+                                }, [
+                                    h('Button', {
+                                        props: {
+                                            type: 'text',
+                                            size: 'small'
+                                        }
+                                    }, '班级管理')
                                 ]),
                                 h('Button', {
                                     props: {
@@ -225,12 +303,12 @@
                         level: 3,
                         children: [
                             {
-                                value: 'admin',
-                                label: '后台角色'
+                                value: 'admin_roles',
+                                label: '智慧云端角色'
                             },
                             {
-                                value: 'user',
-                                label: '前台角色'
+                                value: 'school_roles',
+                                label: '学校端角色'
                             }
                         ]
                     },
@@ -240,12 +318,16 @@
                         level: 2,
                         children: [
                             {
-                                value: 'admin',
-                                label: '后台菜单'
+                                value: 'admin_menus',
+                                label: '智慧云端菜单'
                             },
                             {
-                                value: 'adminTop',
-                                label: '后台顶部菜单'
+                                value: 'admin_top_menus',
+                                label: '智慧云端顶部菜单'
+                            },
+                            {
+                                value: 'school_menus',
+                                label: '学校端菜单'
                             }
                         ]
                     },
@@ -255,12 +337,12 @@
                         level: 1,
                         children: [
                             {
-                                value: 'admin',
-                                label: '后台权限'
+                                value: 'admin_permissions',
+                                label: '智慧云端权限'
                             },
                             {
-                                value: 'user',
-                                label: '前台权限'
+                                value: 'school_permissions',
+                                label: '学校端权限'
                             }
                         ]
                     }
@@ -274,7 +356,15 @@
                     width: '250px',
                     height: '300px'
                 },
-                operations: ['To left', 'To right']
+                operations: ['To left', 'To right'],
+                course: {
+                    coursesData: [],
+                    targetCoursesData: []
+                },
+                banji: {
+                    classesData: [],
+                    targetClassesData: []
+                }
             };
         },
         methods: {
@@ -290,10 +380,22 @@
                             'page': this.page,
                             'number': this.number
                         }
-                    })
-                ]).then(([users]) => {
+                    }),
+                    this.axios.get('{{host_v1}}/course'),
+                    this.axios.get('{{host_v1}}/classes')
+                ]).then(([users, courses, classes]) => {
                     this.editInlineData = users.data.data.data;
                     this.total = users.data.data.total;
+                    const tempCourses = [];
+                    const tempClasses = [];
+                    for (let course of courses.data.data) {
+                        tempCourses.push({'key': course.id, 'label': course.course_name});
+                    }
+                    this.course.coursesData = tempCourses;
+                    for (let banji of classes.data.data) {
+                        tempClasses.push({'key': banji.id, 'label': util.parseGrade(banji.enrollment_year) + banji.class_name});
+                    }
+                    this.banji.classesData = tempClasses;
                 });
             },
             * actionModal (name, method, index = 0) {
@@ -360,7 +462,7 @@
                         params: {
                             type: itemType,
                             filter: filter,
-                            scope: scope,
+                            returnScope: scope,
                             returnType: itemType
                         }
                     }),
@@ -386,15 +488,29 @@
             renderItem (item) {
                 return item.item_name + ' - ' + item.item_desc;
             },
-            handleChange (targetData, value, data) {
-                this.axios.post('{{host_v1}}/auth/item/assignment/' + data.id, {
+            renderCourseItem (item) {
+                return item.label;
+            },
+            renderClassItem (item) {
+                return item.label;
+            },
+            batchStoreCourses (targetData, value, data) {
+                this.axios.post('{{host_v1}}/user/batch/store/courses', {
                     ids: targetData,
-                    provider: 'users',
-                    type: value[0],
-                    scope: value[1]
+                    user_id: data.id
                 }).then(response => {
                     if (response.data.code === '0') {
-                        this.targetItems = targetData;
+                        this.course.targetCoursesData = targetData;
+                    }
+                });
+            },
+            batchStoreClasses (targetData, value, data) {
+                this.axios.post('{{host_v1}}/user/batch/store/classes', {
+                    ids: targetData,
+                    user_id: data.id
+                }).then(response => {
+                    if (response.data.code === '0') {
+                        this.banji.targetClassesData = targetData;
                     }
                 });
             }

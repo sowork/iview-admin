@@ -26,12 +26,12 @@
                 </FormItem>
                 <FormItem label="节点类型" prop="item_type">
                     <Select v-model.number="formItem.item_type">
-                        <Option v-for="item in itemTypes" :value="item.value" :key="item.value">{{ item.name }}</Option>
+                        <Option v-for="item in itemTypes" :value="item.value" :key="item.label">{{ item.label }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="节点归属" prop="scope">
                     <Select v-model="formItem.scope" multiple>
-                        <Option v-for="item in getItemScopes()" :value="item.value" :key="item.value + item.name">{{ item.name }}</Option>
+                        <Option v-for="item in getItemScopes()" :value="item.value" :key="item.value + item.label">{{ item.label }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="额外数据" prop="other_data">
@@ -56,7 +56,7 @@
         data () {
             return {
                 httpRequest: '',
-                itemTypes: [
+                itemTypes1: [
                     {
                         value: 3,
                         name: '角色',
@@ -100,6 +100,57 @@
                         ]
                     }
                 ],
+                itemTypes: [
+                    {
+                        value: 3,
+                        label: '角色',
+                        level: 3,
+                        children: [
+                            {
+                                value: 'admin_roles',
+                                label: '智慧云端角色'
+                            },
+                            {
+                                value: 'school_roles',
+                                label: '学校端角色'
+                            }
+                        ]
+                    },
+                    {
+                        value: 2,
+                        label: '菜单',
+                        level: 2,
+                        children: [
+                            {
+                                value: 'admin_menus',
+                                label: '智慧云端菜单'
+                            },
+                            {
+                                value: 'admin_top_menus',
+                                label: '智慧云端顶部菜单'
+                            },
+                            {
+                                value: 'school_menus',
+                                label: '学校端菜单'
+                            }
+                        ]
+                    },
+                    {
+                        value: 1,
+                        label: '权限',
+                        level: 1,
+                        children: [
+                            {
+                                value: 'admin_permissions',
+                                label: '智慧云端权限'
+                            },
+                            {
+                                value: 'school_permissions',
+                                label: '学校端权限'
+                            }
+                        ]
+                    }
+                ],
                 editInlineColumns: [
                     {
                         title: '序号',
@@ -123,10 +174,10 @@
                             let scopeStr = [];
                             for (let item of this.itemTypes) {
                                 if (item.value === Number.parseInt(params.row.item_type)) { // 类型对应
-                                    for (let itemScope of item.scopes) {
+                                    for (let itemScope of item.children) {
                                         for (let scope of params.row.scope.split(',')) {
                                             if (itemScope.value === scope) {
-                                                scopeStr.push(itemScope.name);
+                                                scopeStr.push(itemScope.label);
                                             }
                                         }
                                     }
@@ -144,7 +195,7 @@
                             let text = '';
                             for (let item of this.itemTypes) {
                                 if (item.value === Number.parseInt(params.row.item_type)) {
-                                    text = item.name;
+                                    text = item.label;
                                 }
                             }
                             return h('a', [
@@ -285,7 +336,7 @@
             getItemScopes () {
                 for (let item of this.itemTypes) {
                     if (item.value === this.formItem.item_type) {
-                        return item.scopes;
+                        return item.children;
                     }
                 }
             },

@@ -256,6 +256,30 @@ util.fullscreenEvent = function (vm) {
     vm.$store.commit('initCachepage');
 };
 
+util.parseGrade = function (date, type = 1) {
+    let year = new Date(date).getFullYear();
+    let currentYear = new Date().getFullYear();
+    if (type === 1) {
+        let diffYear = Number.parseInt(currentYear) - Number.parseInt(year);
+        switch (diffYear) {
+            case 0:
+                return '一年级';
+            case 1:
+                return '二年级';
+            case 2:
+                return '三年级';
+            case 3:
+                return '四年级';
+            case 4:
+                return '五年级';
+            case 5:
+                return '六年级';
+            default:
+                return '已毕业';
+        }
+    }
+};
+
 util.checkUpdate = function (vm) {
     axios.get('https://api.github.com/repos/iview/iview-admin/releases/latest').then(res => {
         let version = res.data.tag_name;

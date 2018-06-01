@@ -176,12 +176,12 @@
                         level: 3,
                         children: [
                             {
-                                value: 'admin',
-                                label: '后台角色'
+                                value: 'admin_roles',
+                                label: '智慧云端角色'
                             },
                             {
-                                value: 'user',
-                                label: '前台角色'
+                                value: 'school_roles',
+                                label: '学校端角色'
                             }
                         ]
                     },
@@ -191,12 +191,16 @@
                         level: 2,
                         children: [
                             {
-                                value: 'admin',
-                                label: '后台菜单'
+                                value: 'admin_menus',
+                                label: '智慧云端菜单'
                             },
                             {
-                                value: 'adminTop',
-                                label: '后台顶部菜单'
+                                value: 'admin_top_menus',
+                                label: '智慧云端顶部菜单'
+                            },
+                            {
+                                value: 'school_menus',
+                                label: '学校端菜单'
                             }
                         ]
                     },
@@ -206,12 +210,12 @@
                         level: 1,
                         children: [
                             {
-                                value: 'admin',
-                                label: '后台权限'
+                                value: 'admin_permissions',
+                                label: '智慧云端权限'
                             },
                             {
-                                value: 'user',
-                                label: '前台权限'
+                                value: 'school_permissions',
+                                label: '学校端权限'
                             }
                         ]
                     }
@@ -304,16 +308,17 @@
                 Promise.all([
                     this.axios.get('{{host_v1}}/auth/item/group/original', {
                         params: {
-                            type: itemType,
                             filter: filter,
-                            scope: scope,
+                            returnScope: scope,
                             returnType: itemType
                         }
                     }),
                     this.axios.get('{{host_v1}}/auth/item/assignment/target', {
                         params: {
                             id: data.id,
-                            provider: 'admins'
+                            provider: 'admins',
+                            returnScope: scope,
+                            returnType: itemType
                         }
                     })
                 ]).then(([items, targetItems]) => {

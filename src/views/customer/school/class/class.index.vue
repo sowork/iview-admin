@@ -21,10 +21,8 @@
                 <FormItem label="班级名称" prop="class_name">
                     <Input v-model="formItem.class_name" placeholder=""></Input>
                 </FormItem>
-                <FormItem label="年级" prop="grade_id">
-                    <Select v-model="formItem.grade_id">
-                        <Option v-for="item in grades" :value="item.id" :key="item.id">{{ item.grade_name }}</Option>
-                    </Select>
+                <FormItem label="入学时间" prop="enrollment_year">
+                    <DatePicker @on-change="parseDate" format="yyyy-MM-dd" :value="formItem.enrollment_year" type="date" placeholder="选择日期" style="width: 200px"></DatePicker>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -65,15 +63,9 @@
                         key: 'class_name'
                     },
                     {
-                        title: '年级',
+                        title: '入学年份',
                         align: 'center',
-                        render: (h, params) => {
-                            for (let grade of Array.from(this.grades)) {
-                                if (grade.id === params.row.grade_id) {
-                                    return grade.grade_name;
-                                }
-                            }
-                        }
+                        key: 'enrollment_year'
                     },
                     {
                         title: '操作',
@@ -140,7 +132,7 @@
                 courses: [],
                 formItem: {
                     class_name: '',
-                    grade_id: ''
+                    enrollment_year: ''
                 },
                 formItem2: {
                     course_ids: [],
@@ -150,8 +142,8 @@
                     class_name: [
                         {required: true, message: '班级名称不能为空', trigger: 'blur'}
                     ],
-                    grade_id: [
-                        {required: true, type: 'number', message: '年级不能为空', trigger: 'change'}
+                    enrollment_year: [
+                        {required: true, message: '入学日期不能为空', trigger: 'blur'}
                     ]
                 }
             };
@@ -160,11 +152,9 @@
             initData () {
                 Promise.all([
                     this.axios.get('{{host_v1}}/classes/index'),
-                    this.axios.get('{{host_v1}}/grade/index'),
                     this.axios.get('{{host_v1}}/course')
-                ]).then(([templates, grades, courses]) => {
+                ]).then(([templates, courses]) => {
                     this.editInlineData = templates.data.data;
-                    this.grades = grades.data.data;
                     this.courses = courses.data.data;
                 });
             },
@@ -234,6 +224,9 @@
                         this.modal2 = false;
                     }
                 });
+            },
+            parseDate (date) {
+                this.formItem.enrollment_year = date;
             }
         },
         created () {

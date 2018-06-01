@@ -8,7 +8,9 @@
                             <Input icon="search" v-model="searchContent" @on-change="handleSearch" placeholder="请输入节点名称搜索..." style="width: 300px" />
                         </Row>
                         <Row class="margin-top-10 searchable-table-con1">
-                            <Table width="330" :columns="columns" :data="data" @on-row-dblclick="handleDbClick"></Table>
+                            <Scroll height="400">
+                                <Table width="330" :columns="columns" :data="data" @on-row-dblclick="handleDbClick"></Table>
+                            </Scroll>
                         </Row>
                     </Card>
                 </Col>

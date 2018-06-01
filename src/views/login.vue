@@ -52,8 +52,8 @@ export default {
         return {
             status: 1,
             form: {
-                userName: '18334787559',
-                password: '123123'
+                userName: '',
+                password: ''
             },
             rules: {
                 userName: [
@@ -69,13 +69,10 @@ export default {
         handleSubmit () {
             let loginUrl = '{{host_v1}}/admin/login';
             let provider = '';
-            let appId = 0;
             if (this.status === 1) {
                 provider = 'users';
-                appId = 9;
             } else {
                 provider = 'admins';
-                appId = 10;
             }
             this.$refs.loginForm.validate((valid) => {
                 if (valid) {
@@ -83,27 +80,26 @@ export default {
                     this.axios.post(loginUrl, {
                         username: this.form.userName,
                         password: this.form.password,
-                        provider: provider,
-                        appId: appId
+                        provider: provider
                     }).then((response) => {
                         if (response.data.access_token) {
                             Cookies.set('user', this.form.userName);
                             return Promise.all([
                                 this.axios.get('{{host_v1}}/auth/items', {
                                     params: {
-                                        'scope': 'admin',
+                                        'scope': 'admin_menus,school_menus',
                                         'type': 2
                                     }
                                 }),
                                 this.axios.get('{{host_v1}}/auth/items', {
                                     params: {
-                                        'scope': 'adminTop',
+                                        'scope': 'admin_top_menus',
                                         'type': 2
                                     }
                                 }),
                                 this.axios.get('{{host_v1}}/auth/items', {
                                     params: {
-                                        'scope': 'admin',
+                                        'scope': 'admin_permissions,school_permissions',
                                         'type': 1
                                     }
                                 })
@@ -115,7 +111,7 @@ export default {
                         localStorage.topMenuList = JSON.stringify(topMenus.data.data);
                         localStorage.permissions = JSON.stringify(permissions.data.data);
                         localStorage.allItems = JSON.stringify(menus.data.data.concat(topMenus.data.data, permissions.data.data));
-                        window.location.href = '/';
+                        window.location.href = '/dist';
                     });
                 }
             });
