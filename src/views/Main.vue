@@ -1,5 +1,8 @@
 <style lang="less">
     @import "./main.less";
+    .demo-spin-icon-load{
+        animation: ani-demo-spin 1s linear infinite;
+    }
 </style>
 <template>
     <div class="main" :class="{'main-hide-text': shrink}">
@@ -14,6 +17,9 @@
                 <div slot="top" class="logo-con">
                     <img v-show="!shrink"  src="../images/logo.jpg" key="max-logo" />
                     <img v-show="shrink" src="../images/logo-min.jpg" key="min-logo" />
+                </div>
+                <div slot="bottom" style="position:absolute; bottom: 8px; left: 20%; font-size: 14px;">
+                    <a @click="loadMenu">重新载入菜单&nbsp;<Icon type="load-c" size=14 :class="{'demo-spin-icon-load': refreshMenus}"></Icon></a>
                 </div>
             </shrinkable-menu>
         </div>
@@ -74,8 +80,8 @@
     import messageTip from './main-components/message-tip.vue';
     import themeSwitch from './main-components/theme-switch/theme-switch.vue';
     import Cookies from 'js-cookie';
-    import util from '@/libs/util.js';
-    
+    import util from '@/libs/util';
+
     export default {
         components: {
             shrinkableMenu,
@@ -91,7 +97,8 @@
                 shrink: false,
                 userName: '',
                 isFullScreen: false,
-                openedSubmenuArr: this.$store.state.app.openedSubmenuArr
+                openedSubmenuArr: this.$store.state.app.openedSubmenuArr,
+                refreshMenus: false
             };
         },
         computed: {
@@ -174,6 +181,13 @@
             },
             fullscreenChange (isFullScreen) {
                 // console.log(isFullScreen);
+            },
+            loadMenu () {
+                this.refreshMenus = true;
+                util.loadMenu().then((response) => {
+                    this.refreshMenus = false;
+                    this.$router.addRoutes(util.storeMenus());
+                });
             }
         },
         watch: {

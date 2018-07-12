@@ -123,7 +123,7 @@
                 this.treeData = [];
                 this.currentItem = {};
                 Promise.all([
-                    this.axios.get('{{host_v1}}/auth/item/relation/tree', {
+                    this.axios.get('{{auth_host_v1}}/auth/item/relation/tree', {
                         params: {
                             type: type
                         }
@@ -229,7 +229,7 @@
                 };
             },
             destroy (root, node, data) {
-                this.axios.post('{{host_v1}}/auth/item/relation/tree/' + data.relation_id, {
+                this.axios.post('{{auth_host_v1}}/auth/item/relation/tree/' + data.relation_id, {
                     _method: 'delete'
                 }).then((response) => {
                     if (response.data.code === '0') {
@@ -261,7 +261,7 @@
                 this.dataItems = res;
             },
             store (row, index, parentRow) {
-                this.axios.post('{{host_v1}}/auth/item/relation/' + parentRow.relation_id, {
+                this.axios.post('{{auth_host_v1}}/auth/item/relation/' + parentRow.relation_id, {
                     id: row.id,
                     scope: this.defaultScope
                 }).then((response) => {
@@ -383,7 +383,7 @@
             },
             getItemOriginal (data, filter = 1) {
                 this.dataItems = this.initDataItems = [];
-                this.axios.get('{{host_v1}}/auth/item/relation/original', {
+                this.axios.get('{{auth_host_v1}}/auth/item/relation/original', {
                     params: {
                         scope: this.defaultScope,
                         type: this.currentType,
@@ -398,7 +398,7 @@
                 this.groupData = [];
                 this.targetItems = [];
                 Promise.all([
-                    this.axios.get('{{host_v1}}/auth/item/group/original', {
+                    this.axios.get('{{auth_host_v1}}/auth/item/group/original', {
                         params: {
                             id: data.id,
                             type: this.currentType,
@@ -408,7 +408,7 @@
                             returnType: itemType
                         }
                     }),
-                    this.axios.get('{{host_v1}}/auth/item/group/target', {
+                    this.axios.get('{{auth_host_v1}}/auth/item/group/target', {
                         params: {
                             id: data.id
                         }
@@ -428,7 +428,7 @@
                 return item.item_name + ' - ' + item.item_desc;
             },
             handleChange (targetData, data) {
-                this.axios.post('{{host_v1}}/auth/item/group/' + data.id, {
+                this.axios.post('{{auth_host_v1}}/auth/item/group/' + data.id, {
                     ids: targetData,
                     scope: this.defaultScope
                 }).then(response => {

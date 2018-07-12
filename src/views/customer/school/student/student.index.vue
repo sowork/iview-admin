@@ -19,12 +19,10 @@
                 </div>
             </div>
         </Card>
-        <Modal :loading="loading" v-model="modal1" title="试卷" @keydown.enter.native="httpRequest.next()">
+        <Modal :loading="loading" v-model="modal1" title="学生列表" @keydown.enter.native="httpRequest.next()">
             <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
                 <FormItem label="班级" prop="class_id">
-                    <Select v-model="formItem.class_id">
-                        <Option v-for="item in classes" :value="item.id" :key="item.id">{{ item.class_name }}</Option>
-                    </Select>
+                    <Cascader :data="classes" v-model="class_data" @on-change="selectClass"></Cascader>
                 </FormItem>
                 <FormItem label="学号" prop="stu_card">
                     <Input v-model="formItem.stu_card" placeholder=""></Input>
@@ -53,6 +51,7 @@
 </template>
 
 <script>
+    import util from '@/libs/util';
     export default {
         name: 'paper_index',
         components: {
@@ -155,10 +154,11 @@
                     stu_card: '',
                     stu_name: '',
                     stu_sex: '',
-                    stu_birthday: '',
                     class_id: '',
+                    stu_birthday: '',
                     nfc_id_code: ''
                 },
+                class_data: [],
                 ruleValidate: {
                     stu_card: [
                         {required: true, type: 'string', message: '学号不能为空', trigger: 'blur'}
@@ -189,17 +189,30 @@
         methods: {
             initData () {
                 Promise.all([
-                    this.axios.get('{{host_v1}}/student', {
+                    this.axios.get('{{base_host_v1}}/student', {
                         params: {
                             'page': this.page,
                             'number': this.number
                         }
                     }),
-                    this.axios.get('{{host_v1}}/classes')
+                    this.axios.get('{{school_host_v1}}/classes')
                 ]).then(([students, classes]) => {
+                    let tempClasses = [];
+                    let temp = [];
+                    for (let banji of classes.data.data) {
+                        if (tempClasses[banji.enrollment_year] === undefined){
+                            tempClasses[banji.enrollment_year] = [];
+                            tempClasses[banji.enrollment_year].push({value: banji.id, label: banji.class_name});
+                        } else {
+                            tempClasses[banji.enrollment_year].push({value: banji.id, label: banji.class_name});
+                        }
+                    }
+                    for (let index in tempClasses) {
+                        temp.push({value: index, label: util.parseGrade(index), children: tempClasses[index]});
+                    }
                     this.editInlineData = students.data.data.data;
                     this.total = students.data.data.total;
-                    this.classes = classes.data.data;
+                    this.classes = temp;
                 });
             },
             * actionModal (name, method, index = 0) {
@@ -217,21 +230,21 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{host_v1}}/student', this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/student', this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.unshift(response.data.data);
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
-                this.axios.post('{{host_v1}}/student/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/student/' + this.formItem.id, this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, response.data.data);
                 });
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/student/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/student/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -242,6 +255,7 @@
             },
             reset (name) {
                 this.$refs[name].resetFields();
+                this.class_data = [];
             },
             onChange (page, number) {
                 this.page = page;
@@ -253,6 +267,9 @@
             },
             parseDate (date) {
                 this.formItem.user_birthday = date;
+            },
+            selectClass (value, selectedData) {
+                this.formItem.class_id = value[1];
             }
         },
         created () {

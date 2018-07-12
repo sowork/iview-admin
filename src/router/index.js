@@ -1,30 +1,27 @@
-import Vue from 'vue';
 import iView from 'iview';
 import Util from '../libs/util';
 import VueRouter from 'vue-router';
 import Cookies from 'js-cookie';
 import {routers, otherRouter, appRouter} from './router';
-import store from '../store';
 
-Vue.use(VueRouter);
-const userMenus = Util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []);
-
-store.state.app.spliteAppMenu = Util.spliteMenu(appRouter); // 自定义路由
-store.state.app.menuList = userMenus.concat(appRouter);
-store.state.app.routers.push(...userMenus);
-store.state.app.menuList.map((item) => {
-    let tagsList = [];
-    if (item.children) {
-        if (item.children.length <= 1) {
-            tagsList.push(item.children[0]);
-        } else {
-            tagsList.push(...item.children);
-        }
-        store.commit('setTagsList', tagsList);
-    }
-});
-
-const menus = routers.concat(userMenus, [{
+// Vue.use(VueRouter);
+// const userMenus = Util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []);
+//
+// store.state.app.spliteAppMenu = Util.spliteMenu(appRouter); // 自定义路由
+// store.state.app.menuList = userMenus.concat(appRouter);
+// store.state.app.routers.push(...userMenus);
+// store.state.app.menuList.map((item) => {
+//     let tagsList = [];
+//     if (item.children) {
+//         if (item.children.length <= 1) {
+//             tagsList.push(item.children[0]);
+//         } else {
+//             tagsList.push(...item.children);
+//         }
+//         store.commit('setTagsList', tagsList);
+//     }
+// });
+const menus = routers.concat(Util.storeMenus(), [{
     path: '/*',
     name: 'error-404',
     meta: {

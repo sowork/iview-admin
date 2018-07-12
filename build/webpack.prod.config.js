@@ -18,7 +18,9 @@ fs.open('./build/env.js', 'w', function(err, fd) {
 
 module.exports = merge(webpackBaseConfig, {
     output: {
-        publicPath: 'http://127.0.0.1/dist/',  // 修改 https://iv...admin 这部分为你的服务器域名
+        // publicPath: 'http://openreading.21thedu.com/dist/dist/',  // 修改 https://iv...admin 这部分为你的服务器域名
+        // publicPath: 'http://192.168.1.21:8803/dist/',  // 修改 https://iv...admin 这部分为你的服务器域名
+        publicPath: 'http://192.168.1.124:8000/dist/dist/',  // 修改 https://iv...admin 这部分为你的服务器域名
         filename: '[name].[hash].js',
         chunkFilename: '[name].[hash].chunk.js'
     },

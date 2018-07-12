@@ -7,7 +7,7 @@
         <Card>
             <p slot="title">
                 <Icon type="android-remove"></Icon>
-                后台用户
+                机构用户
             </p>
             <div class="edittable-table-height-con">
                 <div class="margin-bottom-10">
@@ -19,16 +19,33 @@
                 <Page @on-change="onChange" @on-page-size-change="onPageSizeChange" :total="total" show-total size="small" show-elevator show-sizer></Page>
             </div>
         </Card>
-        <Modal :loading="loading" v-model="modal1" title="后台用户" @keydown.enter.native="httpRequest.next()">
+        <Modal :loading="loading" v-model="modal1" title="机构用户" @keydown.enter.native="httpRequest.next()">
             <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
-                <FormItem label="用户姓名" prop="name">
-                    <Input v-model="formItem.name" placeholder=""></Input>
+                <FormItem label="所属机构" prop="org_id">
+                    <Select
+                            v-model="formItem.org_id"
+                            filterable
+                            remote
+                            :label="org_name"
+                            :remote-method="searchOrg"
+                            :loading="loading1">
+                        <Option v-for="(option, index) in options1" :value="option.id" :key="index">{{option.org_name}}</Option>
+                    </Select>
                 </FormItem>
-                <FormItem label="账户名称" prop="username">
-                    <Input v-model="formItem.username" placeholder=""></Input>
+                <FormItem label="账户名称" prop="account">
+                    <Input v-model="formItem.account" placeholder=""></Input>
                 </FormItem>
                 <FormItem label="账户密码" prop="password">
-                    <Input type="password" v-model="formItem.password" placeholder=""></Input>
+                    <Input type="password" v-model="formItem.password" placeholder="不填默认为123456"></Input>
+                </FormItem>
+                <FormItem label="用户姓名" prop="real_name">
+                    <Input v-model="formItem.real_name" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="用户电话" prop="tel">
+                    <Input v-model="formItem.tel" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="用户邮箱" prop="email">
+                    <Input v-model="formItem.email" placeholder=""></Input>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -44,12 +61,26 @@
     import Vue from 'vue';
 
     Vue.component('PopTipTransfer', PopTipTransfer);
-
     export default {
+        name: 'paper_index',
         components: {
         },
         data () {
+            const validePhone = (rule, value, callback) => {
+                if (value === '') {
+                    callback();
+                }
+                var re = /^1[0-9]{10}$/;
+                if (value !== null && !re.test(value)) {
+                    callback(new Error('请输入正确格式的手机号'));
+                } else {
+                    callback();
+                }
+            };
             return {
+                org_name: '',
+                options1: [],
+                loading1: false,
                 editInlineColumns: [
                     {
                         title: '序号',
@@ -57,14 +88,31 @@
                         key: 'id'
                     },
                     {
-                        title: '用户名称',
+                        title: '账号',
                         align: 'center',
-                        key: 'name'
+                        key: 'account'
                     },
                     {
-                        title: '账户名称',
+                        title: '用户姓名',
                         align: 'center',
-                        key: 'username'
+                        key: 'real_name'
+                    },
+                    {
+                        title: '所属机构',
+                        align: 'center',
+                        render: (h, params) => {
+                            return params.row.org.org_name;
+                        }
+                    },
+                    {
+                        title: '用户电话',
+                        align: 'center',
+                        key: 'tel'
+                    },
+                    {
+                        title: '用户邮箱',
+                        align: 'center',
+                        key: 'email'
                     },
                     {
                         title: '操作',
@@ -89,7 +137,7 @@
                                     },
                                     on: {
                                         onPopperShow: (value) => {
-                                            this.loadGroupItems(value[0], value[1], params.row);
+                                            this.loadGroupItems(value[0], value[1], params.row, 0);
                                         },
                                         handleChange: (event) => {
                                             this.handleChange(event, params.row);
@@ -101,7 +149,7 @@
                                             this.loadGroupItems(value[0], value[1], params.row);
                                         },
                                         selectItemChange: (value, selectedData) => {
-                                            this.loadGroupItems(value[0], value[1], params.row);
+                                            this.loadGroupItems(value[0], value[1], params.row, 0);
                                         }
                                     }
                                 }, [
@@ -119,6 +167,7 @@
                                     },
                                     on: {
                                         click: () => {
+                                            this.org_name = params.row.org.org_name;
                                             this.dblClick(JSON.parse(JSON.stringify(this.editInlineData[params.index])), params.index);
                                         }
                                     }
@@ -155,22 +204,34 @@
                 loading: false,
                 httpRequest: '',
                 formItem: {
-                    name: '',
-                    username: '',
-                    password: ''
+                    account: '',
+                    real_name: '',
+                    password: '',
+                    nickname: '',
+                    email: null,
+                    tel: null,
+                    org_id: ''
                 },
                 ruleValidate: {
-                    name: [
-                        {required: true, type: 'string', message: '用户姓名不能为空', trigger: 'blur'}
+                    org_id: [
+                        {required: true, type: 'number', message: '机构是必填项', trigger: 'blur'}
                     ],
-                    username: [
+                    account: [
                         {required: true, type: 'string', message: '账户名称不能为空', trigger: 'blur'}
                     ],
                     password: [
                         { min: 6, message: '请至少输入6个字符', trigger: 'blur' },
                         { max: 32, message: '最多输入32个字符', trigger: 'blur' }
+                    ],
+                    tel: [
+                        {validator: validePhone}
+                    ],
+                    email: [
+                        {type: 'email', message: '邮箱格式错误', trigger: 'blur'}
                     ]
                 },
+                roles: [],
+                checkAllGroup: [],
                 itemTypes: [
                     {
                         value: 3,
@@ -242,9 +303,11 @@
                 ];
 
                 Promise.all([
-                    this.axios.get('{{base_host_v1}}/admin', {
-                        'page': this.page,
-                        'number': this.number
+                    this.axios.get('{{base_host_v1}}/org/users', {
+                        params: {
+                            'page': this.page,
+                            'number': this.number
+                        }
                     })
                 ]).then(([users]) => {
                     this.editInlineData = users.data.data.data;
@@ -266,7 +329,7 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{base_host_v1}}/admin', this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/org/users', this.formItem).then(response => {
                     this.editInlineData.push(response.data.data);
                 }).then(response => {
                     this.modal1 = false;
@@ -275,15 +338,15 @@
             update (index) {
                 this.formItem._method = 'put';
                 Promise.all([
-                    this.axios.post('{{base_host_v1}}/admin/' + this.formItem.id, this.formItem)
-                ]).then(([$admin, $roles]) => {
+                    this.axios.post('{{base_host_v1}}/org/users/' + this.formItem.id, this.formItem)
+                ]).then(([$user]) => {
                     this.modal1 = false;
-                    this.editInlineData.splice(index, 1, $admin.data.data);
+                    this.editInlineData.splice(index, 1, $user.data.data);
                 });
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{base_host_v1}}/admin/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/org/users/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -293,8 +356,8 @@
                 this.httpRequest.next();
             },
             reset (name) {
+                this.options1 = [];
                 this.$refs[name].resetFields();
-                this.checkAllGroup = [];
             },
             onChange (page, number) {
                 this.page = page;
@@ -303,6 +366,9 @@
             onPageSizeChange (number) {
                 this.number = number;
                 this.initData();
+            },
+            parseDate (date) {
+                this.formItem.user_birthday = date;
             },
             loadGroupItems (itemType, scope, data, filter = 1) {
                 this.groupData = [];
@@ -318,7 +384,7 @@
                     this.axios.get('{{auth_host_v1}}/auth/item/assignment/target', {
                         params: {
                             id: data.id,
-                            provider: 'admins'
+                            provider: 'org_users'
                         }
                     })
                 ]).then(([items, targetItems]) => {
@@ -338,12 +404,36 @@
             handleChange (targetData, data) {
                 this.axios.post('{{auth_host_v1}}/auth/item/assignment/' + data.id, {
                     ids: targetData,
-                    provider: 'admins'
+                    provider: 'org_users'
                 }).then(response => {
                     if (response.data.code === '0') {
                         this.targetItems = targetData;
                     }
                 });
+            },
+            searchOrg (query) {
+                if (query === '') return;
+                this.loading1 = true;
+                this.axios.get('{{base_host_v1}}/org/search', {
+                    params: {
+                        name: query
+                    }
+                }).then(response => {
+                    this.loading1 = false;
+                    this.options1 = response.data.data;
+                });
+            }
+        },
+        watch: {
+            'formItem.email': function  (val, old) {
+                if (val === '') {
+                    this.formItem.email = null;
+                }
+            },
+            'formItem.tel': function  (val, old) {
+                if (val === '') {
+                    this.formItem.tel = null;
+                }
             }
         },
         created () {

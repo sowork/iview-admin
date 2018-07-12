@@ -16,7 +16,7 @@ Vue.use(VueAxios, axios);
 // 注册指令
 Vue.directive('permission', {
     bind: function (el, binding, vnode) {
-        let items = JSON.parse(localStorage.allItems || []).concat(store.state.app.spliteAppMenu);
+        let items = JSON.parse(localStorage.allItems || '[]').concat(store.state.app.spliteAppMenu);
         let currentPermission = binding.value;
         let flag = false;
         for (let item of items) {

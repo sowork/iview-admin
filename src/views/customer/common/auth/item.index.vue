@@ -287,7 +287,7 @@
         },
         methods: {
             initData () {
-                this.axios.get('{{host_v1}}/auth/item').then(response => {
+                this.axios.get('{{auth_host_v1}}/auth/item').then(response => {
                     this.editInlineData = response.data.data;
                 });
             },
@@ -306,21 +306,21 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{host_v1}}/auth/item', this.formItem).then(response => {
+                this.axios.post('{{auth_host_v1}}/auth/item', this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.unshift(response.data.data);
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
-                this.axios.post('{{host_v1}}/auth/item/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{auth_host_v1}}/auth/item/' + this.formItem.id, this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, response.data.data);
                 });
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/auth/item/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{auth_host_v1}}/auth/item/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -341,7 +341,7 @@
                 }
             },
             refreshItem () {
-                this.axios.get('{{host_v1}}/auth/item/refresh/cache').then(response => {
+                this.axios.get('{{auth_host_v1}}/auth/item/refresh/cache').then(response => {
                     if (response.data.code === '0') {
                         Message.success(response.data.msg);
                     }

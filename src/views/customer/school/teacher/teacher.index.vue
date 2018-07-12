@@ -162,7 +162,7 @@
                                     },
                                     on: {
                                         onPopperShow: (value) => {
-                                            this.axios.get('{{host_v1}}/user/courses', {
+                                            this.axios.get('{{auth_host_v1}}/user/courses', {
                                                 params: {
                                                     user_id: params.row.id
                                                 }
@@ -199,7 +199,7 @@
                                     },
                                     on: {
                                         onPopperShow: (value) => {
-                                            this.axios.get('{{host_v1}}/user/classes', {
+                                            this.axios.get('{{auth_host_v1}}/user/classes', {
                                                 params: {
                                                     user_id: params.row.id
                                                 }
@@ -375,14 +375,14 @@
                 ];
 
                 Promise.all([
-                    this.axios.get('{{host_v1}}/school/teachers', {
+                    this.axios.get('{{base_host_v1}}/school/teachers', {
                         params: {
                             'page': this.page,
                             'number': this.number
                         }
                     }),
-                    this.axios.get('{{host_v1}}/course'),
-                    this.axios.get('{{host_v1}}/classes')
+                    this.axios.get('{{base_host_v1}}/course'),
+                    this.axios.get('{{school_host_v1}}/classes')
                 ]).then(([users, courses, classes]) => {
                     this.editInlineData = users.data.data.data;
                     this.total = users.data.data.total;
@@ -413,7 +413,7 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{host_v1}}/school/teacher/store', this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/school/teacher/store', this.formItem).then(response => {
                     this.editInlineData.push(response.data.data);
                 }).then(response => {
                     this.modal1 = false;
@@ -422,7 +422,7 @@
             update (index) {
                 this.formItem._method = 'put';
                 Promise.all([
-                    this.axios.post('{{host_v1}}/school/teacher/update/' + this.formItem.id, this.formItem)
+                    this.axios.post('{{base_host_v1}}/school/teacher/update/' + this.formItem.id, this.formItem)
                 ]).then(([$user, $roles]) => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, $user.data.data);
@@ -430,7 +430,7 @@
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/school/teacher/destroy/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/school/teacher/destroy/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -458,7 +458,7 @@
                 this.groupData = [];
                 this.targetItems = [];
                 Promise.all([
-                    this.axios.get('{{host_v1}}/auth/item/group/original', {
+                    this.axios.get('{{auth_host_v1}}/auth/item/group/original', {
                         params: {
                             type: itemType,
                             filter: filter,
@@ -466,7 +466,7 @@
                             returnType: itemType
                         }
                     }),
-                    this.axios.get('{{host_v1}}/auth/item/assignment/target', {
+                    this.axios.get('{{auth_host_v1}}/auth/item/assignment/target', {
                         params: {
                             id: data.id,
                             provider: 'users',
@@ -495,7 +495,7 @@
                 return item.label;
             },
             batchStoreCourses (targetData, value, data) {
-                this.axios.post('{{host_v1}}/user/batch/store/courses', {
+                this.axios.post('{{base_host_v1}}/user/batch/store/courses', {
                     ids: targetData,
                     user_id: data.id
                 }).then(response => {
@@ -505,7 +505,7 @@
                 });
             },
             batchStoreClasses (targetData, value, data) {
-                this.axios.post('{{host_v1}}/user/batch/store/classes', {
+                this.axios.post('{{base_host_v1}}/user/batch/store/classes', {
                     ids: targetData,
                     user_id: data.id
                 }).then(response => {

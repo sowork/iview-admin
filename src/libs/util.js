@@ -1,8 +1,11 @@
-import axios from 'axios';
+import axios from '@/libs/axios';
 import semver from 'semver';
 import packjson from '../../package.json';
 import { routerList } from '../router/router.component';
 import { appRouter } from '../router/router';
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import store from '../store';
 
 let util = {
 
@@ -328,6 +331,55 @@ util.parseMenuTree = function (menus) {
     }
 
     return tree;
+};
+
+util.loadMenu = function () {
+    return Promise.all([
+        axios.get('{{auth_host_v1}}/auth/items', {
+            params: {
+                'scope': 'admin_menus,school_menus',
+                'type': 2
+            }
+        }),
+        axios.get('{{auth_host_v1}}/auth/items', {
+            params: {
+                'scope': 'admin_top_menus',
+                'type': 2
+            }
+        }),
+        axios.get('{{auth_host_v1}}/auth/items', {
+            params: {
+                'scope': 'admin_permissions,school_permissions',
+                'type': 1
+            }
+        })
+    ]).then(([menus, topMenus, permissions]) => {
+        localStorage.menuList = JSON.stringify(menus.data.data);
+        localStorage.topMenuList = JSON.stringify(topMenus.data.data);
+        localStorage.permissions = JSON.stringify(permissions.data.data);
+        localStorage.allItems = JSON.stringify(menus.data.data.concat(topMenus.data.data, permissions.data.data));
+    });
+};
+
+util.storeMenus = function () {
+    Vue.use(VueRouter);
+    const userMenus = util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []);
+
+    store.state.app.spliteAppMenu = util.spliteMenu(appRouter); // 自定义路由
+    store.state.app.menuList = userMenus.concat(appRouter);
+    store.state.app.routers.push(...userMenus);
+    store.state.app.menuList.map((item) => {
+        let tagsList = [];
+        if (item.children) {
+            if (item.children.length <= 1) {
+                tagsList.push(item.children[0]);
+            } else {
+                tagsList.push(...item.children);
+            }
+            store.commit('setTagsList', tagsList);
+        }
+    });
+    return userMenus;
 };
 
 export default util;

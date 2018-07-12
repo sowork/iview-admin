@@ -7,7 +7,7 @@
         <Card>
             <p slot="title">
                 <Icon type="android-remove"></Icon>
-                试卷列表
+                课程列表
             </p>
             <div class="edittable-table-height-con">
                 <Row>
@@ -164,7 +164,7 @@
         methods: {
             initData () {
                 Promise.all([
-                    this.axios.get('{{host_v1}}/student/index/attention', {
+                    this.axios.get('{{school_host_v1}}/student/index/attention', {
                         params: this.formItem
                     })
                 ]).then(([attentionData]) => {
@@ -178,7 +178,7 @@
             searchTeachers (query) {
                 if (query !== '') {
                     this.isLoading = true;
-                    this.axios.get('{{host_v1}}/school/users', {
+                    this.axios.get('{{school_host_v1}}/school/users', {
                         params: {
                             user_name: query
                         }
@@ -191,7 +191,7 @@
                 }
             },
             getClasses (value) {
-                this.axios.get('{{host_v1}}/user/classes', {
+                this.axios.get('{{auth_host_v1}}/user/classes', {
                     params: {
                         user_id: value
                     }
@@ -200,7 +200,7 @@
                 });
             },
             getCourses (value) {
-                this.axios.get('{{host_v1}}/class/courses', {
+                this.axios.get('{{school_host_v1}}/class/courses', {
                     params: {
                         user_id: this.teacher_id,
                         id: value

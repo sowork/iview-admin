@@ -307,13 +307,13 @@
                 ];
 
                 Promise.all([
-                    this.axios.get('{{host_v1}}/user', {
+                    this.axios.get('{{base_host_v1}}/user', {
                         params: {
                             'page': this.page,
                             'number': this.number
                         }
                     }),
-                    this.axios.get('{{host_v1}}/school')
+                    this.axios.get('{{base_host_v1}}/school')
                 ]).then(([users, schools]) => {
                     this.editInlineData = users.data.data.data;
                     this.total = users.data.data.total;
@@ -335,7 +335,7 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{host_v1}}/user', this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/user', this.formItem).then(response => {
                     this.editInlineData.push(response.data.data);
                 }).then(response => {
                     this.modal1 = false;
@@ -344,7 +344,7 @@
             update (index) {
                 this.formItem._method = 'put';
                 Promise.all([
-                    this.axios.post('{{host_v1}}/user/' + this.formItem.id, this.formItem)
+                    this.axios.post('{{base_host_v1}}/user/' + this.formItem.id, this.formItem)
                 ]).then(([$user, $roles]) => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, $user.data.data);
@@ -352,7 +352,7 @@
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{host_v1}}/user/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/user/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -380,19 +380,17 @@
                 this.groupData = [];
                 this.targetItems = [];
                 Promise.all([
-                    this.axios.get('{{host_v1}}/auth/item/group/original', {
+                    this.axios.get('{{auth_host_v1}}/auth/item/group/original', {
                         params: {
                             filter: filter,
                             returnScope: scope,
                             returnType: itemType
                         }
                     }),
-                    this.axios.get('{{host_v1}}/auth/item/assignment/target', {
+                    this.axios.get('{{auth_host_v1}}/auth/item/assignment/target', {
                         params: {
                             id: data.id,
-                            provider: 'users',
-                            returnScope: scope,
-                            returnType: itemType
+                            provider: 'users'
                         }
                     })
                 ]).then(([items, targetItems]) => {
@@ -410,7 +408,7 @@
                 return item.item_name + ' - ' + item.item_desc;
             },
             handleChange (targetData, data) {
-                this.axios.post('{{host_v1}}/auth/item/assignment/' + data.id, {
+                this.axios.post('{{auth_host_v1}}/auth/item/assignment/' + data.id, {
                     ids: targetData,
                     provider: 'users'
                 }).then(response => {

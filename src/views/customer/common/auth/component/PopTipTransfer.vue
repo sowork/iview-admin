@@ -1,3 +1,8 @@
+<style>
+    .hide {
+        display: none;
+    }
+</style>
 <template>
     <Poptip :placement="placement" width="660" @on-popper-show="onPopperShow" transfer>
         <div slot="content">
@@ -6,9 +11,9 @@
                     <Card>
                         <slot name="head">
                             <div style="padding-bottom: 15px">
-                                <Button type="ghost" @click="showFilterData">LoadFilter</Button>
-                                <Button type="ghost" @click="showAllData">LoadAll</Button>
-                                <Cascader ref="tt" :data="items" v-model="itemValueCopy" @on-change="selectItemChange" style="width: 250px; display: inline-block"></Cascader>
+                                <Button :class="{hide: !showBtn1}" type="ghost" @click="showFilterData">LoadFilter</Button>
+                                <Button :class="{hide: !showBtn2}" type="ghost" @click="showAllData">LoadAll</Button>
+                                <Cascader :class="{hide: !showCascader}" :data="items" v-model="itemValueCopy" @on-change="selectItemChange" style="width: 250px; display: inline-block"></Cascader>
                             </div>
                         </slot>
                         <Transfer
@@ -32,6 +37,18 @@
     export default {
         name: 'PopTipTransfer',
         props: {
+            showBtn1: {
+                type: Boolean,
+                default: true
+            },
+            showBtn2: {
+                type: Boolean,
+                default: true
+            },
+            showCascader: {
+                type: Boolean,
+                default: true
+            },
             groupData: Array,
             targetItems: Array,
             listStyle: Object,

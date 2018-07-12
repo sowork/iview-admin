@@ -7,16 +7,40 @@ import { Message } from 'iview';
  * 配置后台访问接口host地址
  * @type {{development: {host: string, host_api: string, host_v1: string}, production: {host: string, host_api: string, host_v1: string}}}
  */
+
 const apiDomain = {
     'development': {
-        'host': 'http://127.0.0.1',
-        'host_api': 'http://127.0.0.1/api',
-        'host_v1': 'http://127.0.0.1/api/v1'
+        // 'host': 'http://127.0.0.1',
+        // 'host_api': 'http://127.0.0.1/api',
+        // 'host_v1': 'http://127.0.0.1/api/v1'
+        'auth_host': 'http://192.168.1.124:8000',
+        'auth_host_api': 'http://192.168.1.124:8000/api',
+        'auth_host_v1': 'http://192.168.1.124:8000/api/v1',
+        'school_host': 'http://192.168.1.124:8001',
+        'school_host_api': 'http://192.168.1.124:8001/api',
+        'school_host_v1': 'http://192.168.1.124:8001/api/v1',
+        'base_host': 'http://192.168.1.124:8002',
+        'base_host_api': 'http://192.168.1.124:8002/api',
+        'base_host_v1': 'http://192.168.1.124:8002/api/v1'
+    },
+    'ceshi': {
+        // 'host': 'http://192.168.1.21:8803',
+        // 'host_api': 'http://192.168.1.21:8803/api',
+        // 'host_v1': 'http://192.168.1.21:8803/api/v1'
+        'auth_host': 'http://auth.hzcloud.com:8006',
+        'auth_host_api': 'http://auth.hzcloud.com:8006/api',
+        'auth_host_v1': 'http://auth.hzcloud.com:8006/api/v1',
+        'school_host': 'http://school.hzcloud.com:8006',
+        'school_host_api': 'http://school.hzcloud.com:8006/api',
+        'school_host_v1': 'http://school.hzcloud.com:8006/api/v1',
+        'base_host': 'http://base.hzcloud.com:8006',
+        'base_host_api': 'http://base.hzcloud.com:8006/api',
+        'base_host_v1': 'http://base.hzcloud.com:8006/api/v1'
     },
     'production': {
-        'host': 'http://192.168.1.21:8803',
-        'host_api': 'http://192.168.1.21:8803/api',
-        'host_v1': 'http://192.168.1.21:8803/api/v1'
+        'host': 'http://openreading.21thedu.com',
+        'host_api': 'http://openreading.21thedu.com/api',
+        'host_v1': 'http://openreading.21thedu.com/api/v1'
     }
 };
 
@@ -31,7 +55,6 @@ let ajax = axios.create({
         'X-Requested-With': 'XMLHttpRequest'
     }
 });
-
 if (bear) {
     ajax.defaults.headers.common['Authorization'] = 'Bearer ' + bear;
 }
@@ -57,7 +80,8 @@ ajax.interceptors.request.use(function (config) {
     return Promise.reject(error);
 });
 
-ajax.interceptors.response.use(function (response) {
+let lastTime = '';
+ajax.interceptors.response.use((response) => {
     if (response.data.access_token) {
         Cookies.set('bear', response.data.access_token);
         Cookies.set('refresh_bear', response.data.refresh_token);
@@ -79,7 +103,7 @@ ajax.interceptors.response.use(function (response) {
         }
     }
     return response;
-}, function (error) {
+}, (error) => {
     // Do something with response error
     if (error.response) {
         switch (error.response.status) {
@@ -129,8 +153,19 @@ ajax.interceptors.response.use(function (response) {
 
             default:
         }
+    } else {
+        error.message = '服务器开小差了...';
     }
-    Message.error(error.message);
+    if (lastTime === '') {
+        lastTime = Date.parse(new Date());
+        Message.error(error.message);
+    } else {
+        let currentTime = Date.parse(new Date());
+        if (currentTime - lastTime > 2) {
+            lastTime = Date.parse(new Date());
+            Message.error(error.message);
+        }
+    }
     return Promise.reject(error);
 });
 

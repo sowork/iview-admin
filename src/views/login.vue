@@ -27,7 +27,7 @@
                             </Input>
                         </FormItem>
                         <FormItem label="">
-                            <RadioGroup v-model="status">
+                            <RadioGroup v-model.number="status">
                                 <Radio label="1">学校端</Radio>
                                 <Radio label="2">管理员端</Radio>
                             </RadioGroup>
@@ -45,7 +45,7 @@
 <script>
 import iView from 'iview';
 import Cookies from 'js-cookie';
-import app from "../store/modules/app";
+import util from '@/libs/util';
 
 export default {
     data () {
@@ -67,7 +67,7 @@ export default {
     },
     methods: {
         handleSubmit () {
-            let loginUrl = '{{host_v1}}/admin/login';
+            let loginUrl = '{{auth_host_v1}}/admin/login';
             let provider = '';
             if (this.status === 1) {
                 provider = 'users';
@@ -84,34 +84,11 @@ export default {
                     }).then((response) => {
                         if (response.data.access_token) {
                             Cookies.set('user', this.form.userName);
-                            return Promise.all([
-                                this.axios.get('{{host_v1}}/auth/items', {
-                                    params: {
-                                        'scope': 'admin_menus,school_menus',
-                                        'type': 2
-                                    }
-                                }),
-                                this.axios.get('{{host_v1}}/auth/items', {
-                                    params: {
-                                        'scope': 'admin_top_menus',
-                                        'type': 2
-                                    }
-                                }),
-                                this.axios.get('{{host_v1}}/auth/items', {
-                                    params: {
-                                        'scope': 'admin_permissions,school_permissions',
-                                        'type': 1
-                                    }
-                                })
-                            ]);
+                            util.loadMenu().then((response) => {
+                                iView.LoadingBar.finish();
+                                window.location.href = '/';
+                            });
                         }
-                    }).then(([menus, topMenus, permissions]) => {
-                        iView.LoadingBar.finish();
-                        localStorage.menuList = JSON.stringify(menus.data.data);
-                        localStorage.topMenuList = JSON.stringify(topMenus.data.data);
-                        localStorage.permissions = JSON.stringify(permissions.data.data);
-                        localStorage.allItems = JSON.stringify(menus.data.data.concat(topMenus.data.data, permissions.data.data));
-                        window.location.href = '/dist';
                     });
                 }
             });

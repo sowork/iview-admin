@@ -7,7 +7,7 @@
         <Card>
             <p slot="title">
                 <Icon type="android-remove"></Icon>
-                年级管理
+                机构管理
             </p>
             <div class="edittable-table-height-con">
                 <div class="margin-bottom-10">
@@ -15,14 +15,34 @@
                 </div>
                 <Table @on-row-dblclick="dblClick" :columns="editInlineColumns" :data="editInlineData" border ></Table>
             </div>
+            <div class="margin-top-20">
+                <Page @on-change="onChange" @on-page-size-change="onPageSizeChange" :total="total" show-total size="small" show-elevator show-sizer></Page>
+            </div>
         </Card>
-        <Modal :loading="loading" v-model="modal1" title="年级管理" @keydown.enter.native="httpRequest.next()">
+        <Modal :loading="loading" v-model="modal1" title="机构管理" @keydown.enter.native="httpRequest.next()">
             <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
-                <FormItem label="班级名称" prop="class_name">
-                    <Input v-model="formItem.class_name" placeholder=""></Input>
+                <FormItem label="机构名称" prop="org_name">
+                    <Input v-model="formItem.org_name" placeholder=""></Input>
                 </FormItem>
-                <FormItem label="入学时间" prop="enrollment_year">
-                    <DatePicker @on-change="parseDate" format="yyyy-MM-dd" :value="formItem.enrollment_year" type="date" placeholder="选择日期" style="width: 200px"></DatePicker>
+                <FormItem label="机构类型" prop="org_type">
+                    <Select v-model="formItem.org_type">
+                        <Option v-for="item in org_type_lists" :value="item.value" :key="item.value">{{ item.name }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="机构地址" prop="org_address">
+                    <Input v-model="formItem.org_address" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="机构邮箱" prop="org_email">
+                    <Input v-model="formItem.org_email" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="机构电话" prop="org_phone">
+                    <Input v-model="formItem.org_phone" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="机构联系人" prop="org_contacter">
+                    <Input v-model="formItem.org_contacter" placeholder=""></Input>
+                </FormItem>
+                <FormItem label="机构官网" prop="org_website">
+                    <Input v-model="formItem.org_website" placeholder=""></Input>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -30,27 +50,21 @@
                 <Button type="primary" @click="httpRequest.next()">确认</Button>
             </div>
         </Modal>
-        <Modal :loading="loading" v-model="modal2" title="课程选择" @keydown.enter.native="httpRequest2.next()">
-            <Form ref="formItem2" :model="formItem2" :label-width="80">
-                <Select v-model="formItem2.course_ids" multiple filterable>
-                    <Option v-for="item in courses" :value="item.id" :key="item.id">{{ item.course_name }}</Option>
-                </Select>
-            </Form>
-            <div slot="footer">
-                <Button type="ghost" @click="reset('formItem2')">重置</Button>
-                <Button type="primary" @click="addCourses">确认</Button>
-            </div>
-        </Modal>
     </div>
 </template>
 
 <script>
     export default {
-        name: 'paper_index',
         components: {
         },
         data () {
             return {
+                org_type_lists: [
+                    {
+                        name: '测评架机构',
+                        value: 1
+                    }
+                ],
                 editInlineColumns: [
                     {
                         title: '序号',
@@ -58,33 +72,54 @@
                         key: 'id'
                     },
                     {
-                        title: '班级名称',
+                        title: '机构名称',
                         align: 'center',
-                        key: 'class_name'
+                        key: 'org_name'
                     },
                     {
-                        title: '入学年份',
+                        title: '机构类别',
                         align: 'center',
-                        key: 'enrollment_year'
+                        render: (h, params) => {
+                            for (let type of Array.from(this.org_type_lists)) {
+                                if (type.value === params.row.org_type) {
+                                    return type.name;
+                                }
+                            }
+                        }
+                    },
+                    {
+                        title: '机构地址',
+                        align: 'center',
+                        key: 'org_address'
+                    },
+                    {
+                        title: '机构邮箱',
+                        align: 'center',
+                        key: 'org_email'
+                    },
+                    {
+                        title: '机构电话',
+                        align: 'center',
+                        key: 'org_phone'
+                    },
+                    {
+                        title: '机构联系人',
+                        align: 'center',
+                        key: 'org_contacter'
+                    },
+                    {
+                        title: '机构官网',
+                        align: 'center',
+                        key: 'org_website'
                     },
                     {
                         title: '操作',
                         key: 'action',
                         align: 'center',
                         fixed: 'right',
+                        width: 200,
                         render: (h, params) => {
                             return h('div', [
-                                h('Button', {
-                                    props: {
-                                        type: 'text',
-                                        size: 'small'
-                                    },
-                                    on: {
-                                        click: () => {
-                                            this.showCourse(JSON.parse(JSON.stringify(this.editInlineData[params.index])), params.index);
-                                        }
-                                    }
-                                }, '课程管理'),
                                 h('Button', {
                                     props: {
                                         type: 'text',
@@ -125,25 +160,40 @@
                 page: 1,
                 number: 10,
                 modal1: false,
-                modal2: false,
                 loading: false,
                 httpRequest: '',
-                grades: [],
-                courses: [],
                 formItem: {
-                    class_name: '',
-                    enrollment_year: ''
-                },
-                formItem2: {
-                    course_ids: [],
-                    cid: 0
+                    org_name: '',
+                    org_type: '',
+                    org_address: '',
+                    org_email: '',
+                    org_phone: '',
+                    org_contacter: '',
+                    org_website: ''
                 },
                 ruleValidate: {
-                    class_name: [
-                        {required: true, message: '班级名称不能为空', trigger: 'blur'}
+                    org_name: [
+                        {required: true, message: '机构名称不能为空', trigger: 'blur'}
                     ],
-                    enrollment_year: [
-                        {required: true, message: '入学日期不能为空', trigger: 'blur'}
+                    org_type: [
+                        {required: true, type: 'number', message: '机构类别不能为空', trigger: 'change'}
+                    ],
+                    org_address: [
+                        {required: true, message: '机构地址不能为空', trigger: 'blur'}
+                    ],
+                    org_phone: [
+                        {required: true, message: '机构电话不能为空', trigger: 'blur'},
+                        {pattern: /^(\+?0?86-?)?((13\d|14[57]|15[^4,\D]|17[3678]|18\d)\d{8}|170[059]\d{7})$/, message: '电话格式错误', trigger: 'blur'}
+                    ],
+                    org_email: [
+                        {required: true, message: '机构邮箱不能为空', trigger: 'blur'},
+                        {type: 'email', message: '邮箱格式不正确', trigger: 'blur'}
+                    ],
+                    org_contacter: [
+                        {required: true, message: '机构联系人不能为空', trigger: 'blur'}
+                    ],
+                    org_website: [
+                        {type: 'url', message: 'url格式错误', trigger: 'blur'}
                     ]
                 }
             };
@@ -151,11 +201,14 @@
         methods: {
             initData () {
                 Promise.all([
-                    this.axios.get('{{base_host_v1}}/classes/index'),
-                    this.axios.get('{{base_host_v1}}/course')
-                ]).then(([templates, courses]) => {
-                    this.editInlineData = templates.data.data;
-                    this.courses = courses.data.data;
+                    this.axios.get('{{base_host_v1}}/org', {
+                        params: {
+                            'page': this.page,
+                            'number': this.number
+                        }
+                    })
+                ]).then(([orgs]) => {
+                    this.editInlineData = orgs.data.data.data;
                 });
             },
             * actionModal (name, method, index = 0) {
@@ -173,21 +226,21 @@
             },
             store () {
                 this.formItem._method = 'post';
-                this.axios.post('{{school_host_v1}}/classes', this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/org', this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.push(response.data.data);
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
-                this.axios.post('{{base_host_v1}}/classes/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/org/' + this.formItem.id, this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, response.data.data);
                 });
             },
             destroy (index) {
                 this.formItem._method = 'delete';
-                this.axios.post('{{base_host_v1}}/classes/' + this.formItem.id, this.formItem).then(response => {
+                this.axios.post('{{base_host_v1}}/org/' + this.formItem.id, this.formItem).then(response => {
                     this.editInlineData.splice(index, 1);
                 });
             },
@@ -206,27 +259,6 @@
             onPageSizeChange (number) {
                 this.number = number;
                 this.initData();
-            },
-            showCourse (row, index) {
-                this.axios.get('{{base_host_v1}}/class/course', {
-                    params: {
-                        id: row.id
-                    }
-                }).then(response => {
-                    this.formItem2.course_ids = response.data.data;
-                });
-                this.formItem2.cid = row.id;
-                this.modal2 = true;
-            },
-            addCourses () {
-                this.axios.post('{{base_host_v1}}/class/add/course', this.formItem2).then(response => {
-                    if (response.data.code === '0') {
-                        this.modal2 = false;
-                    }
-                });
-            },
-            parseDate (date) {
-                this.formItem.enrollment_year = date;
             }
         },
         created () {
