@@ -1,0 +1,35 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<!--
+2013-9-30: Created.
+-->
+<svg>
+<metadata>
+Created by iconfont
+</metadata>
+<defs>
+
+<font id="iconfont" horiz-adv-x="1024" >
+  <font-face
+    font-family="iconfont"
+    font-weight="500"
+    font-stretch="normal"
+    units-per-em="1024"
+    ascent="896"
+    descent="-128"
+  />
+    <missing-glyph />
+    
+    <glyph glyph-name="bingzhuangtu" unicode="&#58910;" d="M512.613 385.465m-446.667 0a446.667 446.667 0 1 1 893.334 0 446.667 446.667 0 1 1-893.334 0ZM512.613 832.132c-246.687 0-446.667-199.979-446.667-446.667h446.667V832.132zM511.802 385.465L903.96 597.804C828.669 736.882 681.719 831.485 512.613 832.121l-0.811-446.656z"  horiz-adv-x="1024" />
+
+    
+    <glyph glyph-name="zhuzhuangtu" unicode="&#58928;" d="M290.15 392.123l-149.461 2.114v-333.16H290.15zM497.316 668.934l-149.462 3.883v-611.74h149.462zM704.481 527.532l-149.461 2.98v-469.435h149.461zM911.647 257.995l-149.462 1.258v-198.176h149.462zM102.139 10.635V797.848H65.063v-830.142h895.855v42.929z"  horiz-adv-x="1024" />
+
+    
+    <glyph glyph-name="zhexiantu" unicode="&#58929;" d="M959.159-32.219H64.063V797.875h37.045v-787.166h858.051zM580.658 99.755L369.686 267.831 158.642 135.215l-17.659 37.737 230.991 145.15 208.508-166.113 334.054 270.609 21.225-35.183zM152.112 294.247l-28.68 27.17L360.23 657.056 569.003 401.08 903.52 792.317l26.316-30.213-361.462-422.75L362.245 592.09z"  horiz-adv-x="1024" />
+
+    
+
+
+  </font>
+</defs></svg>

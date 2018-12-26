@@ -6,6 +6,8 @@ import { appRouter } from '../router/router';
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import store from '../store';
+import { apiDomain } from '@/libs/const';
+import env from '../../build/env';
 
 let util = {
 
@@ -303,32 +305,34 @@ util.parseMenuTree = function (menus) {
         return [];
     }
     let tree = [];
-    let temp = {tree: {}};
+    let temp = new Map();
     for (let item of menus) {
         if (item.other_data !== undefined && item.other_data !== '') {
             let data = JSON.parse(item.other_data);
-            temp['tree'][item.relation_id] = {
+            temp.set(item.relation_id, {
                 path: data.path,
                 icon: data.icon,
                 component: routerList[item.item_code],
                 title: item.item_name,
                 parent_id: item.parent_id,
                 relation_id: item.relation_id,
-                name: item.item_code
-            };
+                name: item.item_code,
+                meta: {target: data.target}
+            });
         }
     }
 
-    for (let index in temp['tree']) {
-        if (temp['tree'][index].parent_id !== null && temp['tree'][temp['tree'][index]['parent_id']] !== undefined) {
-            if (temp['tree'][temp['tree'][index]['parent_id']].children === undefined) {
-                temp['tree'][temp['tree'][index]['parent_id']].children = [];
+    for (let value of temp.values()) {
+        if (value.parent_id !== null && temp.get(value.parent_id) !== undefined) {
+            if (temp.get(value.parent_id).children === undefined) {
+                temp.get(value.parent_id).children = [];
             }
-            temp['tree'][temp['tree'][index]['parent_id']].children.push(temp['tree'][index]);
+            temp.get(value.parent_id).children.push(value);
         } else {
-            tree.push(temp['tree'][index]);
+            tree.push(value);
         }
     }
+
     for (let index in tree) {
         if (tree[index].children === undefined) {
             tree.splice(index, 1);
@@ -387,5 +391,17 @@ util.storeMenus = function () {
 
     return userMenus;
 };
+
+util.parseUrl = function (url) {
+    let reg = /{{([a-zA-Z0-9_.-]+)}}/g;
+    let item = '';
+    while ((item = reg.exec(url)) !== null) {
+        if (item) {
+            let tmp = new RegExp('{{' + item[1] + '}}', 'g');
+            url = url.replace(tmp, apiDomain[env][item[1]]);
+        }
+    }
+    return url;
+}
 
 export default util;

@@ -1,57 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import env from '../../build/env';
 import { Message } from 'iview';
-
-/**
- * 配置后台访问接口host地址
- * @type {{development: {host: string, host_api: string, host_v1: string}, production: {host: string, host_api: string, host_v1: string}}}
- */
-
-const apiDomain = {
-    'development': {
-        // 'host': 'http://127.0.0.1',
-        // 'host_api': 'http://127.0.0.1/api',
-        // 'host_v1': 'http://127.0.0.1/api/v1'
-        'auth_host': 'http://192.168.1.124:8000',
-        'auth_host_api': 'http://192.168.1.124:8000/api',
-        'auth_host_v1': 'http://192.168.1.124:8000/api/v1',
-        'school_host': 'http://192.168.1.124:8001',
-        'school_host_api': 'http://192.168.1.124:8001/api',
-        'school_host_v1': 'http://192.168.1.124:8001/api/v1',
-        'base_host': 'http://192.168.1.124:8002',
-        'base_host_api': 'http://192.168.1.124:8002/api',
-        'base_host_v1': 'http://192.168.1.124:8002/api/v1'
-    },
-    'ceshi': {
-        // 'host': 'http://192.168.1.21:8803',
-        // 'host_api': 'http://192.168.1.21:8803/api',
-        // 'host_v1': 'http://192.168.1.21:8803/api/v1'
-        'auth_host': 'http://192.168.1.21:8006',
-        'auth_host_api': 'http://192.168.1.21:8006/api',
-        'auth_host_v1': 'http://192.168.1.21:8006/api/v1',
-        'school_host': 'http://192.168.1.23:8007',
-        'school_host_api': 'http://192.168.1.23:8007/api',
-        'school_host_v1': 'http://192.168.1.23:8007/api/v1',
-        'base_host': 'http://192.168.1.23:8008',
-        'base_host_api': 'http://192.168.1.23:8008/api',
-        'base_host_v1': 'http://192.168.1.23:8008/api/v1'
-    },
-    'production': {
-        // 'host': 'http://192.168.1.21:8803',
-        // 'host_api': 'http://192.168.1.21:8803/api',
-        // 'host_v1': 'http://192.168.1.21:8803/api/v1'
-        'auth_host': 'http://auth.21thedu.com/',
-        'auth_host_api': 'http://auth.21thedu.com/api',
-        'auth_host_v1': 'http://auth.21thedu.com/api/v1',
-        'school_host': 'http://agent.21thedu.com/',
-        'school_host_api': 'http://agent.21thedu.com/api',
-        'school_host_v1': 'http://agent.21thedu.com/api/v1',
-        'base_host': 'http://family.21thedu.com/',
-        'base_host_api': 'http://family.21thedu.com/api',
-        'base_host_v1': 'http://family.21thedu.com/api/v1'
-    }
-};
+import util from './util';
 
 let bear = Cookies.get('bear');
 
@@ -68,21 +18,9 @@ if (bear) {
     ajax.defaults.headers.common['Authorization'] = 'Bearer ' + bear;
 }
 
-function parseUrl (url) {
-    let reg = /{{([a-zA-Z0-9_.-]+)}}/g;
-    let item = '';
-    while ((item = reg.exec(url)) !== null) {
-        if (item) {
-            let tmp = new RegExp('{{' + item[1] + '}}', 'g');
-            url = url.replace(tmp, apiDomain[env][item[1]]);
-        }
-    }
-    return url;
-}
-
 // Add a request interceptor
 ajax.interceptors.request.use(function (config) {
-    config.url = parseUrl(config.url);
+    config.url = util.parseUrl(config.url);
     return config;
 }, function (error) {
     // Do something with request error
@@ -102,7 +40,17 @@ ajax.interceptors.response.use((response) => {
         if (response.data.code === '-1') {
             const err = new Error(response.data.msg);
             err.response = response;
-            Message.error(response.data.msg);
+            if (lastTime === '') {
+                lastTime = Date.parse(new Date());
+                Message.error(response.data.msg);
+            } else {
+                let currentTime = Date.parse(new Date());
+                if (currentTime - lastTime > 4) {
+                    lastTime = Date.parse(new Date());
+                    Message.error(response.data.msg);
+                }
+            }
+            // Message.error(response.data.msg);
             throw err;
         } else if (response.data.code === '-2') {
             const err = new Error(response.data.msg);
@@ -170,7 +118,7 @@ ajax.interceptors.response.use((response) => {
         Message.error(error.message);
     } else {
         let currentTime = Date.parse(new Date());
-        if (currentTime - lastTime > 2) {
+        if (currentTime - lastTime > 4) {
             lastTime = Date.parse(new Date());
             Message.error(error.message);
         }

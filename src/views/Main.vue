@@ -50,6 +50,7 @@
                                 </a>
                                 <DropdownMenu slot="list">
                                     <DropdownItem v-permission="'ownspace_index'" name="ownSpace">个人中心</DropdownItem>
+                                    <DropdownItem name="cDashboard">机构报表</DropdownItem>
                                     <DropdownItem name="loginout" divided>退出登录</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
@@ -149,6 +150,15 @@
                     this.$router.push({
                         name: 'ownspace_index'
                     });
+                } else if (name === 'cDashboard') {
+//                    util.openNewPage(this, 'cDashboard');
+//                    this.$router.push({
+//                        name: 'cDashboard'
+//                    });
+                    const {href} = this.$router.resolve({
+                        name: 'cDashboard'
+                    });
+                    window.open(href, '_blank');
                 } else if (name === 'loginout') {
                     // 退出登录
                     this.$store.commit('logout', this);

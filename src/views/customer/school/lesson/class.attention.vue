@@ -92,42 +92,42 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        key: 'id'
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '教师姓名',
                         align: 'center',
                         render: (h, params) => {
-                            return params.row.user.user_name;
+                            return h('span', params.row.user.user_name);
                         }
                     },
                     {
                         title: '班级',
                         align: 'center',
                         render: (h, params) => {
-                            return util.parseGrade(params.row.banji.enrollment_year) + params.row.banji.class_name;
+                            return h('span', util.parseGrade(params.row.banji.enrollment_year) + params.row.banji.class_name);
                         }
                     },
                     {
                         title: '课程',
                         align: 'center',
                         render: (h, params) => {
-                            return params.row.course.course_name;
+                            return h('span', params.row.course.course_name);
                         }
                     },
                     {
                         title: '录制开始时间',
                         align: 'center',
                         render: (h, params) => {
-                            return params.row.start_date;
+                            return h('span', params.row.start_date);
                         }
                     },
                     {
                         title: '录制结束时间',
                         align: 'center',
                         render: (h, params) => {
-                            return params.row.end_date;
+                            return h('span', params.row.end_date);
                         }
                     },
                     {

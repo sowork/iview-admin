@@ -84,8 +84,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        key: 'id'
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '账号',
@@ -101,7 +101,7 @@
                         title: '所属机构',
                         align: 'center',
                         render: (h, params) => {
-                            return params.row.org.org_name;
+                            return h('span', params.row.org.org_name);
                         }
                     },
                     {

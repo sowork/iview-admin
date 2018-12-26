@@ -21,17 +21,6 @@
         </Card>
         <Modal :loading="loading" v-model="modal1" title="机构用户" @keydown.enter.native="httpRequest.next()">
             <Form ref="formItem" :model="formItem" :rules="ruleValidate" :label-width="80">
-                <FormItem label="所属机构" prop="org_id">
-                    <Select
-                            v-model="formItem.org_id"
-                            filterable
-                            remote
-                            :label="org_name"
-                            :remote-method="searchOrg"
-                            :loading="loading1">
-                        <Option v-for="(option, index) in options1" :value="option.id" :key="index">{{option.org_name}}</Option>
-                    </Select>
-                </FormItem>
                 <FormItem label="账户名称" prop="account">
                     <Input v-model="formItem.account" placeholder=""></Input>
                 </FormItem>
@@ -47,6 +36,12 @@
                 <FormItem label="用户邮箱" prop="email">
                     <Input v-model="formItem.email" placeholder=""></Input>
                 </FormItem>
+                <hr>
+                <CheckboxGroup v-model="formItem.rolesIds">
+                    <Checkbox :label="role.id" v-for="role in roles">
+                        <span v-text="role.item_name"></span>
+                    </Checkbox>
+                </CheckboxGroup>
             </Form>
             <div slot="footer">
                 <Button type="ghost" @click="reset('formItem')">重置</Button>
@@ -143,8 +138,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        key: 'id'
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '账号',
@@ -160,7 +155,7 @@
                         title: '所属机构',
                         align: 'center',
                         render: (h, params) => {
-                            return params.row.org.org_name;
+                            return h('span', params.row.org.org_name);
                         }
                     },
                     {
@@ -262,6 +257,7 @@
                 modal1: false,
                 loading: false,
                 httpRequest: '',
+                roles: [],
                 formItem: {
                     account: '',
                     real_name: '',
@@ -269,7 +265,8 @@
                     nickname: '',
                     email: null,
                     tel: null,
-                    org_id: ''
+                    org_id: '',
+                    rolesIds: []
                 },
                 ruleValidate: {
                     org_id: [
@@ -289,7 +286,6 @@
                         {type: 'email', message: '邮箱格式错误', trigger: 'blur'}
                     ]
                 },
-                roles: [],
                 dataItems: [],
                 initDataItems: [],
                 groupData: [],
@@ -310,10 +306,25 @@
                             'page': this.page,
                             'number': this.number
                         }
+                    }),
+                    this.axios.get('{{auth_host_v1}}/auth/items', {
+                        params: {
+                            type: 3,
+                            scope: 'org_roles'
+                        }
                     })
-                ]).then(([users]) => {
+                ]).then(([users, roles]) => {
+                    for (let user of users.data.data.data) {
+                        user.rolesIds = [];
+                        if (user.roles !== undefined && user.roles.length > 0) {
+                            for (let role of user.roles) {
+                                user.rolesIds.push(role.item_id);
+                            }
+                        }
+                    }
                     this.editInlineData = users.data.data.data;
                     this.total = users.data.data.total;
+                    this.roles = roles.data.data;
                 });
             },
             * actionModal (name, method, index = 0) {
@@ -341,9 +352,11 @@
                 this.formItem._method = 'put';
                 Promise.all([
                     this.axios.post('{{base_host_v1}}/org/sub/users/' + this.formItem.id, this.formItem)
-                ]).then(([$user]) => {
+                ]).then(([response]) => {
                     this.modal1 = false;
-                    this.editInlineData.splice(index, 1, $user.data.data);
+                    let user = response.data.data;
+//                    user.rolesIds = this.formItem.rolesIds;
+                    this.editInlineData.splice(index, 1, user);
                 });
             },
             destroy (index) {

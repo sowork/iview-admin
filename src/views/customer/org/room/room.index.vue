@@ -57,8 +57,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        render: (h, params) => params.index + 1
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '房间名称',

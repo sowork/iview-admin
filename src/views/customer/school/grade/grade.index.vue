@@ -43,8 +43,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        key: 'id'
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '年级名称',

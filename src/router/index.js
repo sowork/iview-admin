@@ -21,6 +21,7 @@ import {routers, otherRouter, appRouter} from './router';
 //         store.commit('setTagsList', tagsList);
 //     }
 // });
+
 const menus = routers.concat(Util.storeMenus(), [{
     path: '/*',
     name: 'error-404',
@@ -39,6 +40,15 @@ const RouterConfig = {
 export const router = new VueRouter(RouterConfig);
 
 router.beforeEach((to, from, next) => {
+    // if (to.meta.target === '_blank' && from.path !== '/') { // 如果meta里面有_blank属性，会自动在新的页面打开
+    //     const {href} = router.resolve({
+    //         // name: to.name
+    //         name: 'cDashboard'
+    //     })
+    //     window.open(href, '_blank');
+    //     next(false);
+    //     return;
+    // }
     iView.LoadingBar.start();
     Util.title(to.meta.title);
     if (Cookies.get('locking') === '1' && to.name !== 'locking') { // 判断当前是否是锁定状态
@@ -75,6 +85,7 @@ router.beforeEach((to, from, next) => {
                     name: 'error-403'
                 });
             } else { // 没有配置权限的路由, 直接通过
+                // if (t)
                 Util.toDefaultPage([...routers], to.name, router, next);
             }
         }

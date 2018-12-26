@@ -17,8 +17,20 @@ export const routerList = {
     'org.manage': () => import('@/views/Main.vue'),
     'org.list': () => import('@/views/customer/admin/org/org.index.vue'),
 
-    'item.manage': () => import('@/views/Main.vue'),
-    'item.list': () => import('@/views/customer/admin/item/item.index.vue'),
+    'resource.manage': () => import('@/views/Main.vue'),
+    'product.list': () => import('@/views/customer/admin/item/product.index.vue'),
+    'course.list': () => import('@/views/customer/admin/item/course.index.vue'),
+    'lesson.list': () => import('@/views/customer/admin/item/lesson.index.vue'),
+    'content.list': () => import('@/views/customer/admin/item/content.index.vue'),
+
+    'operation.manage': () => import('@/views/Main.vue'),
+    'operation.linyi': () => import('@/views/customer/admin/operation/linyi.index.vue'),
+    'operation.platform': () => import('@/views/customer/admin/operation/platform.index.vue'),
+
+    'model.manage': () => import('@/views/Main.vue'),
+    'model.list': () => import('@/views/customer/admin/model/model.index.vue'),
+    'index.list': () => import('@/views/customer/admin/model/index.index.vue'),
+    'component.list': () => import('@/views/customer/admin/model/component.index.vue'),
 
     // ========================学校===============================
     'school.manage': () => import('@/views/Main.vue'),
@@ -30,21 +42,11 @@ export const routerList = {
 
 
     // ========================机构===============================
-	//资源管理
-	'resource.manage': () => import('@/views/Main.vue'),
-    'org.room.manage': () => import('@/views/customer/org/room/room.index.vue'),
-	
-	//课程管理
-	'course.manage': () => import('@/views/Main.vue'),
+    'org.manage.client': () => import('@/views/Main.vue'),
+    'org.users': () => import('@/views/customer/org/user/user.index.vue'),
+    'org.room.list': () => import('@/views/customer/org/room/room.index.vue'),
     'org.term.list': () => import('@/views/customer/org/term/term.index.vue'),
-	'org.combo.list': () => import('@/views/customer/org/combo/combo.index.vue'),
-	
-	//档案管理
-	'archives.manage': () => import('@/views/Main.vue'),
-	'org.users': () => import('@/views/customer/org/user/user.index.vue'),
-	'org.child.list': () => import('@/views/customer/org/child/child.index.vue'),
-	
-	
-	
-	
+    'org.combo.list': () => import('@/views/customer/org/combo/combo.index.vue'),
+    'org.child.list': () => import('@/views/customer/org/child/child.index.vue'),
+    'org.task.list': () => import('@/views/customer/org/task/task.index.vue'),
 };

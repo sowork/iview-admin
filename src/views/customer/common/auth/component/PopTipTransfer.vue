@@ -4,7 +4,7 @@
     }
 </style>
 <template>
-    <Poptip v-model="visibleCopy.value" :placement="placement" width="660" @on-popper-show="onPopperShow" @on-popper-hide="onPopperHide" transfer>
+    <Poptip v-model="visibleCopy.value" :placement="placement" :width="width" @on-popper-show="onPopperShow" @on-popper-hide="onPopperHide" transfer>
         <div slot="content">
             <Row :gutter="10">
                 <Col span="24">
@@ -40,6 +40,10 @@
             visible: {
                 type: Boolean,
                 default: false
+            },
+            width: {
+                type: Number,
+                default: 660
             },
             showBtn1: {
                 type: Boolean,

@@ -166,8 +166,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        key: 'id'
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '节点代码',
@@ -195,7 +195,7 @@
                                     }
                                 }
                             }
-                            return scopeStr.join(',');
+                            return h('span', scopeStr.join(','));
                         }
                     },
                     {

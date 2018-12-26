@@ -26,8 +26,11 @@
                 </FormItem>
                 <FormItem label="套餐类别" prop="combo_type">
                     <Select v-model="formItem.combo_type">
-                        <Option v-for="item in org_type_lists" :value="item.value" :key="item.value">{{ item.name }}</Option>
+                        <Option v-for="item in org_type_lists" :disabled="item.disabled" :value="item.value" :key="item.value">{{ item.name }}</Option>
                     </Select>
+                </FormItem>
+                <FormItem label="销售价格" prop="sale_price">
+                    <Input v-model.number="formItem.sale_price" placeholder=""></Input>
                 </FormItem>
                 <FormItem label="使用次数" prop="use_num">
                     <Input v-model.number="formItem.use_num" placeholder="不填表示不限制"></Input>
@@ -152,6 +155,11 @@
                             </FormItem>
                         </Col>
                         <Col span="4" offset="1">
+                            <FormItem label="价格(元)" :prop="'items.' + index + '.price'"  :rules="ruleValidate3.use_num">
+                                <Input v-model.number="item.price" placeholder=""></Input>
+                            </FormItem>
+                        </Col>
+                        <Col span="4" offset="1">
                             <FormItem label=" ">
                                 <Button type="ghost" @click="handleRemove2(index)">删除</Button>
                             </FormItem>
@@ -208,7 +216,8 @@
                 org_type_lists: [
                     {
                         name: '机构套餐',
-                        value: 1
+                        value: 1,
+                        disabled: true
                     },
                     {
                         name: '家庭套餐',
@@ -228,8 +237,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        render: (h, params) => params.index + 1
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '套餐名称',
@@ -242,9 +251,16 @@
                         render: (h, params) => {
                             for (let type of Array.from(this.org_type_lists)) {
                                 if (type.value === params.row.combo_type) {
-                                    return type.name;
+                                    return h('span', type.name);
                                 }
                             }
+                        }
+                    },
+                    {
+                        title: '销售价格(元)',
+                        align: 'center',
+                        render: (h, params) => {
+                            h('span', params.row.sale_price / 100);
                         }
                     },
                     {
@@ -267,7 +283,7 @@
                         key: 'action',
                         align: 'center',
                         fixed: 'right',
-                        width: 200,
+                        width: 300,
                         render: (h, params) => {
                             return h('div', [
                                 h('Button', {
@@ -301,13 +317,26 @@
                                                     product_id: '',
                                                     combo_id: params.row.id,
                                                     item_id: '',
-                                                    use_num: null
+                                                    use_num: null,
+                                                    price: 0
                                                 }];
                                                 this.getFamilyItems(params.row.id);
                                             }
                                         }
                                     }
                                 }, '添加内容'),
+                                h('Button', {
+                                    props: {
+                                        type: 'text',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.httpRequest = this.actionModal('formItem', 'store', params.row.id, 'modal1', true);
+                                            this.httpRequest.next();
+                                        }
+                                    }
+                                }, '添加子套餐'),
                                 h('Button', {
                                     props: {
                                         type: 'text',
@@ -355,13 +384,15 @@
                 httpRequest2: '',
                 httpRequest3: '',
                 formItem: {
+                    pid: 0,
                     combo_name: '',
                     combo_type: '',
                     start_date: null,
                     end_date: null,
                     combo_desc: '',
                     valid_day: null,
-                    use_num: null
+                    use_num: null,
+                    sale_price: 0
                 },
                 formItem2: {
                     items: []
@@ -489,15 +520,19 @@
                     });
                 }
             },
-            store () {
+            store (pid) {
                 this.formItem._method = 'post';
-                this.axios.post('{{base_host_v1}}/combos', this.formItem).then(response => {
+                this.formItem.pid = (pid + 0) > 0 ? pid : 0;
+                let data = JSON.parse(JSON.stringify(this.formItem));
+                data.sale_price *= 100;
+                this.axios.post('{{base_host_v1}}/combos', data).then(response => {
                     this.modal1 = false;
                     this.editInlineData.unshift(response.data.data);
                 });
             },
             update (index) {
                 this.formItem._method = 'put';
+                this.formItem.sale_price *= 100;
                 this.axios.post('{{base_host_v1}}/combos/' + this.formItem.id, this.formItem).then(response => {
                     this.modal1 = false;
                     this.editInlineData.splice(index, 1, response.data.data);
@@ -511,6 +546,7 @@
             },
             dblClick (row, index) {
                 this.formItem = row;
+                this.formItem.sale_price /= 100;
                 this.httpRequest = this.actionModal('formItem', 'update', index);
                 this.httpRequest.next();
             },
@@ -561,7 +597,8 @@
                     product_id: '',
                     combo_id: this.formItem3.items[0].combo_id,
                     item_id: '',
-                    use_num: null
+                    use_num: null,
+                    price: 0
                 });
             },
             storeOrgItems (id) {
@@ -589,6 +626,9 @@
             getFamilyItems (id) {
                 this.axios.get('{{base_host_v1}}/combos/family/item/' + id).then(response => {
                     if (response.data.data.length > 0) {
+                        for (let item of response.data.data) {
+                            item.price = Math.floor(item.price / 100, 2);
+                        }
                         this.formItem3.items = response.data.data.concat(this.formItem3.items);
                     }
                 });

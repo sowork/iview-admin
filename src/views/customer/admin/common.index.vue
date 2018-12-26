@@ -68,8 +68,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        render: (h, params) => params.index + 1
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '机构名称',
@@ -82,7 +82,7 @@
                         render: (h, params) => {
                             for (let type of Array.from(this.org_type_lists)) {
                                 if (type.value === params.row.org_type) {
-                                    return type.name;
+                                    return h('span', type.name);
                                 }
                             }
                         }

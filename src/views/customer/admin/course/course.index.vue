@@ -56,8 +56,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        key: 'id'
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '班级名称',
@@ -70,7 +70,7 @@
                         render: (h, params) => {
                             for (let grade of Array.from(this.grades)) {
                                 if (grade.id === params.row.grade_id) {
-                                    return grade.grade_name;
+                                    return h('span', grade.grade_name);
                                 }
                             }
                         }

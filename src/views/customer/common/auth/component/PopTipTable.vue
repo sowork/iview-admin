@@ -1,5 +1,5 @@
 <template>
-    <Poptip placement="bottom" width="400" @on-popper-show="onPopperShow">
+    <Poptip :placement="placement" width="400" @on-popper-show="onPopperShow">
         <div slot="content">
             <Row :gutter="10">
                 <Col span="24">
@@ -26,7 +26,11 @@
         props: {
             columns: Array,
             data: Array,
-            selectNode: Object
+            selectNode: Object,
+            placement: {
+                type: String,
+                default: 'bottom'
+            }
         },
         data () {
             return {

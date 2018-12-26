@@ -1,14 +1,14 @@
 Arguments: 
-  C:\software\node\node.exe C:\software\yarn\bin\yarn.js run dev
+  C:\Program Files\nodejs\node.exe D:\SoftWare\yarn\bin\yarn.js upgrade
 
 PATH: 
-  C:\Program Files\Docker\Docker\Resources\bin;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\software\Git\cmd;C:\software\node\;C:\software\yarn\bin\;C:\software\phpstudy\php\php-7.0.12-nts;C:\ProgramData\ComposerSetup\bin;;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Users\sowork\AppData\Local\Microsoft\WindowsApps;C:\Users\sowork\AppData\Roaming\npm;C:\Users\sowork\AppData\Local\Yarn\bin;C:\Users\sowork\AppData\Roaming\Composer\vendor\bin;
+  C:\Program Files\Docker\Docker\Resources\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;D:\SoftWare\SVN\bin;D:\SoftWare\VisualSVN Server\bin;C:\ProgramData\ComposerSetup\bin;D:\SoftWare\vagrant\bin;D:\SoftWare\phpStudy\php\php-7.0.12-nts;D:\SoftWare\yarn\bin;C:\WINDOWS\System32\OpenSSH\;D:\SoftWare\Git\Git\cmd;C:\Program Files\nodejs\;C:\Users\dn\AppData\Local\Programs\Python\Python36-32\Scripts\;C:\Users\dn\AppData\Local\Programs\Python\Python36-32\;C:\Users\dn\AppData\Roaming\Composer\vendor\bin;D:\SoftWare\phpStudy\phpunit;D:\SoftWare\yarn\bin;D:\SoftWare\Visual-NMP-x64\Bin\PHP\php-7.2.5-nts-x64;C:\Users\dn\AppData\Local\Programs\Fiddler;D:\SoftWare\ssh;C:\Users\dn\AppData\Local\Yarn\bin;D:\SoftWare\;C:\Users\dn\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Docker\Docker\Resources\bin;C:\Users\dn\AppData\Roaming\npm
 
 Yarn version: 
-  1.5.1
+  1.3.2
 
 Node version: 
-  8.11.1
+  8.11.4
 
 Platform: 
   win32 x64
@@ -21,7 +21,8 @@ npm manifest:
     "main": "index.js",
     "scripts": {
       "init": "webpack --progress --config build/webpack.dev.config.js",
-      "dev": "webpack-dev-server --content-base ./ --open --inline --hot --compress --config build/webpack.dev.config.js",
+      "dev": "webpack-dev-server --content-base ./ --open --inline --hot --compress --host 192.168.1.124 --config build/webpack.dev.config.js",
+      "ceshi": "webpack --progress --hide-modules --config build/webpack.ceshi.config.js",
       "build": "webpack --progress --hide-modules --config build/webpack.prod.config.js",
       "lint": "eslint --fix --ext .js,.vue src",
       "test": "npm run lint"
@@ -44,6 +45,7 @@ npm manifest:
       "iview-area": "^1.5.16",
       "jquery": "^3.3.1",
       "js-cookie": "^2.2.0",
+      "moment": "^2.22.2",
       "rasterizehtml": "^1.2.4",
       "simplemde": "^1.11.2",
       "sortablejs": "^1.7.0",
@@ -1773,7 +1775,11 @@ Lockfile:
       pify "^3.0.0"
       serialize-javascript "^1.4.0"
   
-  core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.3:
+  core-js@^2.4.0, core-js@^2.5.3:
+    version "2.5.7"
+    resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.7.tgz#f972608ff0cead68b841a16a932d0b183791814e"
+  
+  core-js@^2.5.0:
     version "2.5.3"
     resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.3.tgz#8acc38345824f16d8365b7c9b4259168e8ed603e"
   
@@ -2043,6 +2049,10 @@ Lockfile:
     version "1.5.2"
     resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-1.5.2.tgz#10499d868844cdad4fee0842df8c7f6f0c95a753"
   
+  deepmerge@^2.1.0:
+    version "2.2.1"
+    resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-2.2.1.tgz#5d3ff22a01c00f645405a2fbc17d0778a1801170"
+  
   define-properties@^1.1.2:
     version "1.1.2"
     resolved "https://registry.yarnpkg.com/define-properties/-/define-properties-1.1.2.tgz#83a73f2fea569898fb737193c8f873caf6d45c94"
@@ -2278,9 +2288,9 @@ Lockfile:
     version "1.3.31"
     resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.31.tgz#00d832cba9fe2358652b0c48a8816c8e3a037e9f"
   
-  element-resize-detector@^1.1.12:
-    version "1.1.13"
-    resolved "https://registry.yarnpkg.com/element-resize-detector/-/element-resize-detector-1.1.13.tgz#f61907e98a91b1ad215f92790bc15113df68444d"
+  element-resize-detector@^1.1.12, element-resize-detector@^1.1.14:
+    version "1.1.14"
+    resolved "https://registry.yarnpkg.com/element-resize-detector/-/element-resize-detector-1.1.14.tgz#af064a0a618a820ad570a95c5eec5b77be0128c1"
     dependencies:
       batch-processor "^1.0.0"
   
@@ -3799,7 +3809,7 @@ Lockfile:
       iview "^2.6.0"
       vue "^2.5.2"
   
-  iview@^2.6.0, iview@^2.8.0:
+  iview@^2.6.0:
     version "2.8.0"
     resolved "https://registry.yarnpkg.com/iview/-/iview-2.8.0.tgz#4f5ebfe493f1697c87022739ca27ddd8797a661c"
     dependencies:
@@ -3811,6 +3821,19 @@ Lockfile:
       popper.js "^0.6.4"
       tinycolor2 "^1.4.1"
   
+  iview@^2.8.0:
+    version "2.14.3"
+    resolved "https://registry.yarnpkg.com/iview/-/iview-2.14.3.tgz#0f32a450f956cce2ac60a4df5a6eba30816a0708"
+    dependencies:
+      async-validator "^1.8.2"
+      deepmerge "^2.1.0"
+      element-resize-detector "^1.1.14"
+      js-calendar "^1.2.3"
+      lodash.throttle "^4.1.1"
+      popper.js "^1.14.1"
+      tinycolor2 "^1.4.1"
+      v-click-outside-x "^3.0.0"
+  
   jquery@^3.3.1:
     version "3.3.1"
     resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"
@@ -3818,6 +3841,10 @@ Lockfile:
   js-base64@^2.1.9:
     version "2.4.1"
     resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.4.1.tgz#e02813181cd53002888e918935467acb2910e596"
+  
+  js-calendar@^1.2.3:
+    version "1.2.3"
+    resolved "https://registry.yarnpkg.com/js-calendar/-/js-calendar-1.2.3.tgz#a583b0644b4e695ba394f344d103dbcc7a7a7d3e"
   
   js-cookie@^2.2.0:
     version "2.2.0"
@@ -4295,6 +4322,10 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
     dependencies:
       minimist "0.0.8"
+  
+  moment@^2.22.2:
+    version "2.22.2"
+    resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
   
   move-concurrently@^1.0.1:
     version "1.0.1"
@@ -4842,6 +4873,10 @@ Lockfile:
   popper.js@^0.6.4:
     version "0.6.4"
     resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-0.6.4.tgz#1837c4760af54d2bb20b66f9c09b92993d84c629"
+  
+  popper.js@^1.14.1:
+    version "1.14.4"
+    resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.14.4.tgz#8eec1d8ff02a5a3a152dd43414a15c7b79fd69b6"
   
   portfinder@^1.0.9:
     version "1.0.13"
@@ -6548,6 +6583,10 @@ Lockfile:
     version "3.2.1"
     resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.2.1.tgz#12c528bb9d58d0b9265d9a2f6f0fe8be17ff1f14"
   
+  v-click-outside-x@^3.0.0:
+    version "3.5.0"
+    resolved "https://registry.yarnpkg.com/v-click-outside-x/-/v-click-outside-x-3.5.0.tgz#a7ede1b917238c6132ccce07c8790227af7b16d9"
+  
   validate-npm-package-license@^3.0.1:
     version "3.0.1"
     resolved "https://registry.yarnpkg.com/validate-npm-package-license/-/validate-npm-package-license-3.0.1.tgz#2804babe712ad3379459acfbe24746ab2c303fbc"
@@ -6938,17 +6977,4 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/zrender/-/zrender-3.7.4.tgz#f847d53948481ef6d42906d1ea9aeec7acbefdf2"
 
 Trace: 
-  Error: Command failed.
-  Exit code: 3221225786
-  Command: C:\WINDOWS\system32\cmd.exe
-  Arguments: /d /s /c webpack-dev-server --content-base ./ --open --inline --hot --compress --config build/webpack.dev.config.js
-  Directory: C:\Users\sowork\Desktop\iview-admin
-  Output:
-  
-      at ProcessTermError.MessageError (C:\software\yarn\lib\cli.js:186:110)
-      at new ProcessTermError (C:\software\yarn\lib\cli.js:226:113)
-      at ChildProcess.<anonymous> (C:\software\yarn\lib\cli.js:30281:17)
-      at emitTwo (events.js:126:13)
-      at ChildProcess.emit (events.js:214:7)
-      at maybeClose (internal/child_process.js:925:16)
-      at Process.ChildProcess._handle.onexit (internal/child_process.js:209:5)
+  Error: EPERM: operation not permitted, unlink 'F:\Work\yun\protal\node_modules\xmlserializer\lib\serializer.js'

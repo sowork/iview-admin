@@ -77,8 +77,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        key: 'id'
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '用户名称',
@@ -111,7 +111,7 @@
                         render: (h, params) => {
                             for (let school of this.schools) {
                                 if (school.id === Number.parseInt(params.row.school_id)) {
-                                    return school.school_name;
+                                    return h('span', school.school_name);
                                 }
                             }
                         }

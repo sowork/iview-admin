@@ -3,7 +3,7 @@
     @import "../../styles/common.less";
 </style>
 <template>
-    <!--<div class="home-main">-->
+    <div class="home-main">
         <!--<Row :gutter="10">-->
             <!--<Col :md="24" :lg="8">-->
                 <!--<Row class-name="home-page-row1" :gutter="10">-->
@@ -172,7 +172,7 @@
                 <!--</div>-->
             <!--</Card>-->
         <!--</Row>-->
-    <!--</div>-->
+    </div>
 </template>
 
 <script>

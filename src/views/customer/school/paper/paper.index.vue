@@ -59,8 +59,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        key: 'id'
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '试卷编号',
@@ -73,7 +73,7 @@
                         render: (h, params) => {
                             for (let item of Array.from(this.paper_types)) {
                                 if (item.value === params.row.paper_type) {
-                                    return item.name;
+                                    return h('span', item.name);
                                 }
                             }
                         }
@@ -84,7 +84,7 @@
                         render: (h, params) => {
                             for (let course of this.courses) {
                                 if (course.course_id === params.row.course_id) {
-                                    return course.course_name;
+                                    return h('span', course.course_name);
                                 }
                             }
                         }

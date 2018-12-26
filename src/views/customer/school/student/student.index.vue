@@ -61,8 +61,8 @@
                 editInlineColumns: [
                     {
                         title: '序号',
-                        align: 'center',
-                        key: 'id'
+                        type: 'index',
+                        align: 'center'
                     },
                     {
                         title: '学号',
@@ -90,7 +90,7 @@
                         render: (h, params) => {
                             for (let item of this.classes) {
                                 if (item.id === params.row.class_id) {
-                                    return item.class_name;
+                                    return h('span', item.class_name);
                                 }
                             }
                         }
