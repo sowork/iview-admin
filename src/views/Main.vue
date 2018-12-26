@@ -1,5 +1,8 @@
 <style lang="less">
     @import "./main.less";
+    .demo-spin-icon-load{
+        animation: ani-demo-spin 1s linear infinite;
+    }
 </style>
 <template>
     <div class="main" :class="{'main-hide-text': shrink}">
@@ -14,6 +17,9 @@
                 <div slot="top" class="logo-con">
                     <img v-show="!shrink"  src="../images/logo.jpg" key="max-logo" />
                     <img v-show="shrink" src="../images/logo-min.jpg" key="min-logo" />
+                </div>
+                <div slot="bottom" style="position:absolute; bottom: 8px; left: 20%; font-size: 14px;">
+                    <a @click="loadMenu">重新载入菜单&nbsp;<Icon type="load-c" size=14 :class="{'demo-spin-icon-load': refreshMenus}"></Icon></a>
                 </div>
             </shrinkable-menu>
         </div>
@@ -32,7 +38,7 @@
                 <div class="header-avator-con">
                     <full-screen v-model="isFullScreen" @on-change="fullscreenChange"></full-screen>
                     <lock-screen></lock-screen>
-                    <message-tip v-model="mesCount"></message-tip>
+                    <message-tip v-model="mesCount" v-permission="'message_index'"></message-tip>
                     <theme-switch></theme-switch>
                     
                     <div class="user-dropdown-menu-con">
@@ -43,7 +49,8 @@
                                     <Icon type="arrow-down-b"></Icon>
                                 </a>
                                 <DropdownMenu slot="list">
-                                    <DropdownItem name="ownSpace">个人中心</DropdownItem>
+                                    <DropdownItem v-permission="'ownspace_index'" name="ownSpace">个人中心</DropdownItem>
+                                    <DropdownItem name="cDashboard">机构报表</DropdownItem>
                                     <DropdownItem name="loginout" divided>退出登录</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
@@ -74,8 +81,8 @@
     import messageTip from './main-components/message-tip.vue';
     import themeSwitch from './main-components/theme-switch/theme-switch.vue';
     import Cookies from 'js-cookie';
-    import util from '@/libs/util.js';
-    
+    import util from '@/libs/util';
+
     export default {
         components: {
             shrinkableMenu,
@@ -91,7 +98,8 @@
                 shrink: false,
                 userName: '',
                 isFullScreen: false,
-                openedSubmenuArr: this.$store.state.app.openedSubmenuArr
+                openedSubmenuArr: this.$store.state.app.openedSubmenuArr,
+                refreshMenus: false
             };
         },
         computed: {
@@ -123,7 +131,7 @@
         methods: {
             init () {
                 let pathArr = util.setCurrentPath(this, this.$route.name);
-                this.$store.commit('updateMenulist', JSON.parse(localStorage.menuList));
+                // this.$store.dispatch('filterMenus', {treeData: JSON.parse(localStorage.menuList || null), vm: this});
                 if (pathArr.length >= 2) {
                     this.$store.commit('addOpenSubmenu', pathArr[1].name);
                 }
@@ -142,6 +150,15 @@
                     this.$router.push({
                         name: 'ownspace_index'
                     });
+                } else if (name === 'cDashboard') {
+//                    util.openNewPage(this, 'cDashboard');
+//                    this.$router.push({
+//                        name: 'cDashboard'
+//                    });
+                    const {href} = this.$router.resolve({
+                        name: 'cDashboard'
+                    });
+                    window.open(href, '_blank');
                 } else if (name === 'loginout') {
                     // 退出登录
                     this.$store.commit('logout', this);
@@ -174,6 +191,13 @@
             },
             fullscreenChange (isFullScreen) {
                 // console.log(isFullScreen);
+            },
+            loadMenu () {
+                this.refreshMenus = true;
+                util.loadMenu().then((response) => {
+                    this.refreshMenus = false;
+                    this.$router.addRoutes(util.storeMenus());
+                });
             }
         },
         watch: {

@@ -1,20 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import env from '../../build/env';
 import { Message } from 'iview';
-
-const apiDomain = {
-    'development': {
-        'host': 'http://127.0.0.1',
-        'host_api': 'http://127.0.0.1/api',
-        'host_v1': 'http://127.0.0.1/api/v1'
-    },
-    'production': {
-        'host': 'http://127.0.0.1:80',
-        'host_api': 'http://127.0.0.1:80/api',
-        'host_v1': 'http://127.0.0.1:80/api/v1'
-    }
-};
+import util from './util';
 
 let bear = Cookies.get('bear');
 
@@ -23,36 +10,25 @@ let ajax = axios.create({
     timeout: 30000,
     headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
     }
 });
-
 if (bear) {
     ajax.defaults.headers.common['Authorization'] = 'Bearer ' + bear;
 }
 
-function parseUrl (url) {
-    let reg = /{{([a-zA-Z0-9_.-]+)}}/g;
-    let item = '';
-    while ((item = reg.exec(url)) !== null) {
-        if (item) {
-            let tmp = new RegExp('{{' + item[1] + '}}', 'g');
-            url = url.replace(tmp, apiDomain[env][item[1]]);
-        }
-    }
-    return url;
-}
-
 // Add a request interceptor
 ajax.interceptors.request.use(function (config) {
-    config.url = parseUrl(config.url);
+    config.url = util.parseUrl(config.url);
     return config;
 }, function (error) {
     // Do something with request error
     return Promise.reject(error);
 });
 
-ajax.interceptors.response.use(function (response) {
+let lastTime = '';
+ajax.interceptors.response.use((response) => {
     if (response.data.access_token) {
         Cookies.set('bear', response.data.access_token);
         Cookies.set('refresh_bear', response.data.refresh_token);
@@ -64,7 +40,17 @@ ajax.interceptors.response.use(function (response) {
         if (response.data.code === '-1') {
             const err = new Error(response.data.msg);
             err.response = response;
-            Message.error(response.data.msg);
+            if (lastTime === '') {
+                lastTime = Date.parse(new Date());
+                Message.error(response.data.msg);
+            } else {
+                let currentTime = Date.parse(new Date());
+                if (currentTime - lastTime > 4) {
+                    lastTime = Date.parse(new Date());
+                    Message.error(response.data.msg);
+                }
+            }
+            // Message.error(response.data.msg);
             throw err;
         } else if (response.data.code === '-2') {
             const err = new Error(response.data.msg);
@@ -74,7 +60,7 @@ ajax.interceptors.response.use(function (response) {
         }
     }
     return response;
-}, function (error) {
+}, (error) => {
     // Do something with response error
     if (error.response) {
         switch (error.response.status) {
@@ -87,7 +73,7 @@ ajax.interceptors.response.use(function (response) {
                 break;
 
             case 403:
-                error.message = '拒绝访问';
+                error.message = '权限不足，拒绝访问';
                 break;
 
             case 404:
@@ -124,8 +110,19 @@ ajax.interceptors.response.use(function (response) {
 
             default:
         }
+    } else {
+        error.message = '服务器开小差了...';
     }
-    Message.error(error.message);
+    if (lastTime === '') {
+        lastTime = Date.parse(new Date());
+        Message.error(error.message);
+    } else {
+        let currentTime = Date.parse(new Date());
+        if (currentTime - lastTime > 4) {
+            lastTime = Date.parse(new Date());
+            Message.error(error.message);
+        }
+    }
     return Promise.reject(error);
 });
 

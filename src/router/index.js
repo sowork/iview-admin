@@ -1,21 +1,54 @@
-import Vue from 'vue';
 import iView from 'iview';
 import Util from '../libs/util';
 import VueRouter from 'vue-router';
 import Cookies from 'js-cookie';
 import {routers, otherRouter, appRouter} from './router';
 
-Vue.use(VueRouter);
+// Vue.use(VueRouter);
+// const userMenus = Util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []);
+//
+// store.state.app.spliteAppMenu = Util.spliteMenu(appRouter); // 自定义路由
+// store.state.app.menuList = userMenus.concat(appRouter);
+// store.state.app.routers.push(...userMenus);
+// store.state.app.menuList.map((item) => {
+//     let tagsList = [];
+//     if (item.children) {
+//         if (item.children.length <= 1) {
+//             tagsList.push(item.children[0]);
+//         } else {
+//             tagsList.push(...item.children);
+//         }
+//         store.commit('setTagsList', tagsList);
+//     }
+// });
+
+const menus = routers.concat(Util.storeMenus(), [{
+    path: '/*',
+    name: 'error-404',
+    meta: {
+        title: '404-页面不存在'
+    },
+    component: () => import('@/views/error-page/404.vue')
+}]);
 
 // 路由配置
 const RouterConfig = {
     // mode: 'history',
-    routes: routers
+    routes: menus
 };
 
 export const router = new VueRouter(RouterConfig);
 
 router.beforeEach((to, from, next) => {
+    // if (to.meta.target === '_blank' && from.path !== '/') { // 如果meta里面有_blank属性，会自动在新的页面打开
+    //     const {href} = router.resolve({
+    //         // name: to.name
+    //         name: 'cDashboard'
+    //     })
+    //     window.open(href, '_blank');
+    //     next(false);
+    //     return;
+    // }
     iView.LoadingBar.start();
     Util.title(to.meta.title);
     if (Cookies.get('locking') === '1' && to.name !== 'locking') { // 判断当前是否是锁定状态
@@ -36,6 +69,7 @@ router.beforeEach((to, from, next) => {
                 name: 'home_index'
             });
         } else {
+            // 权限菜单过滤相关
             const curRouterObj = Util.getRouterObjByName([otherRouter, ...appRouter], to.name);
             if (curRouterObj && curRouterObj.access !== undefined) { // 需要判断权限的路由
                 let allAccess = Cookies.get('access');
@@ -51,6 +85,7 @@ router.beforeEach((to, from, next) => {
                     name: 'error-403'
                 });
             } else { // 没有配置权限的路由, 直接通过
+                // if (t)
                 Util.toDefaultPage([...routers], to.name, router, next);
             }
         }
@@ -58,7 +93,9 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to) => {
-    Util.openNewPage(router.app, to.name, to.params, to.query);
-    iView.LoadingBar.finish();
-    window.scrollTo(0, 0);
+    if (to.name) {
+        Util.openNewPage(router.app, to.name, to.params, to.query);
+        iView.LoadingBar.finish();
+        window.scrollTo(0, 0);
+    }
 });

@@ -11,14 +11,14 @@ export const loginRouter = {
     component: () => import('@/views/login.vue')
 };
 
-export const page404 = {
-    path: '/*',
-    name: 'error-404',
-    meta: {
-        title: '404-页面不存在'
-    },
-    component: () => import('@/views/error-page/404.vue')
-};
+// export const page404 = {
+//     path: '/*',
+//     name: 'error-404',
+//     meta: {
+//         title: '404-页面不存在'
+//     },
+//     component: () => import('@/views/error-page/404.vue')
+// };
 
 export const page403 = {
     path: '/403',
@@ -50,6 +50,16 @@ export const locking = {
     component: () => import('@/views/main-components/lockscreen/components/locking-page.vue')
 };
 
+export const cDashboard = {
+    path: '/c/dashboard',
+    meta: {
+        title: '报表统计'
+    },
+    name: 'cDashboard',
+    params: { userId: 123 },
+    component: () => import('@/views/customer/admin/operation/c.dashboard.index.vue')
+};
+
 // 作为Main组件的子页面展示但是不在左侧菜单显示的路由写在otherRouter里
 export const otherRouter = {
     path: '/',
@@ -58,47 +68,44 @@ export const otherRouter = {
     component: Main,
     children: [
         { path: 'home', title: {i18n: 'home'}, name: 'home_index', component: () => import('@/views/home/home.vue') },
-        { path: 'ownspace', title: '个人中心', name: 'ownspace_index', component: () => import('@/views/own-space/own-space.vue') },
-        { path: 'order/:order_id', title: '订单详情', name: 'order-info', component: () => import('@/views/advanced-router/component/order-info.vue') }, // 用于展示动态路由
-        { path: 'shopping', title: '购物详情', name: 'shopping', component: () => import('@/views/advanced-router/component/shopping-info.vue') }, // 用于展示带参路由
         { path: 'message', title: '消息中心', name: 'message_index', component: () => import('@/views/message/message.vue') },
-
-        { path: 'item/relation', title: '节点关联', name: 'item.relation', component: () => import('@/views/customer/item/item.relation.vue') },
-        { path: 'item/group', title: '节点分组', name: 'item.group', component: () => import('@/views/customer/item/item.group.vue') },
-        { path: 'item/assign', title: '节点分配', name: 'item.assign', component: () => import('@/views/customer/item/item.assign.vue') }
+        { path: 'ownspace', title: '个人中心', name: 'ownspace_index', component: () => import('@/views/own-space/own-space.vue') },
+        // { path: 'c/dashboard', title: '报表统计', name: 'cDashboard', component: () => import('@/views/customer/admin/operation/c.dashboard.index.vue') },
+        // { path: 'order/:order_id', title: '订单详情', name: 'order-info', component: () => import('@/views/advanced-router/component/order-info.vue') }, // 用于展示动态路由
+        // { path: 'shopping', title: '购物详情', name: 'shopping', component: () => import('@/views/advanced-router/component/shopping-info.vue') }, // 用于展示带参路由
+        // { path: 'item/relation', title: '节点关联', name: 'item.relation', component: () => import('@/views/customer/item/item.relation.vue') },
+        // { path: 'item/group', title: '节点分组', name: 'item.group', component: () => import('@/views/customer/item/item.group.vue') },
+        // { path: 'item/assign', title: '节点分配', name: 'item.assign', component: () => import('@/views/customer/item/item.assign.vue') }
     ]
 };
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
-export const appRouter = [
-    // 'auth.manage': () => import('@/views/Main.vue'),
-    // 'permission.list': () => import('@/views/customer/auth/item.index.vue'),
-    // 'permission.': () => import('@/views/customer/auth/item.relation.group.vue'),
-
-    // {
-    //     path: '/manage',
-    //     icon: 'key',
-    //     name: 'manage',
-    //     title: '学校管理',
-    //     component: Main,
-    //     children: [
-    //         { path: 'grade/index', title: '年级管理', access: ['grade.index'], name: 'grade.index', component: () => import('@/views/customer/grade/grade.index.vue') },
-    //         { path: 'class/index', title: '班级管理', name: 'class.index', component: () => import('@/views/customer/class/class.index.vue') },
-    //         { path: 'student/index', title: '学生管理', name: 'student.index', component: () => import('@/views/customer/student/student.index.vue') },
-    //         // { path: 'paper/index', title: '试卷管理', access: ['paper.index'], name: 'paper.index', component: () => import('@/views/customer/paper/paper.index.vue') },
-    //         // { path: 'template/index', title: '模板管理', name: 'template.index', component: () => import('@/views/customer/template/template.index.vue') },
-    //         // { path: 'quota/index', title: '指标管理', name: 'quota.index', component: () => import('@/views/customer/quota/quota.index.vue') },
-    //     ]
-    // },
+export let appRouter = [
     // {
     //     path: '/item',
     //     icon: 'key',
-    //     name: 'item',
-    //     title: '授权管理',
+    //     name: 'authentication.manage',
+    //     title: '权限管理',
     //     component: Main,
     //     children: [
-    //         { path: 'auth/items', title: '权限列表', name: 'item.index', component: () => import('@/views/customer/auth/item.index.vue') },
-    //         { path: 'auth/menus', title: '权限关联', name: 'item.menu', component: () => import('@/views/customer/auth/item.relation.group.vue') },
+    //         { path: 'auth/items', title: '权限列表', name: 'authentication.list', component: () => import('@/views/customer/common/auth/item.index.vue') },
+    //         { path: 'auth/menus', title: '权限关联', name: 'authentication.union', component: () => import('@/views/customer/common/auth/item.relation.group.vue') },
+    //     ]
+    // },
+    // {
+    //     path: '/school/manage',
+    //     icon: 'key',
+    //     name: 'school.manage',
+    //     title: '学校管理',
+    //     component: Main,
+    //     children: [
+    //         { path: 'grade/index', title: '年级列表', name: 'school.grade.index', component: () => import('@/views/customer/school/grade/grade.index.vue') },
+    //         { path: 'class/index', title: '班级列表', name: 'school.class.index', component: () => import('@/views/customer/school/class/class.index.vue') },
+    //         { path: 'student/index', title: '学生列表', name: 'school.student.index', component: () => import('@/views/customer/school/student/student.index.vue') },
+    //         { path: 'teacher/index', title: '教师列表', name: 'school.teachers', component: () => import('@/views/customer/school/teacher/teacher.index.vue') },
+    //         // { path: 'paper/index', title: '试卷管理', access: ['paper.index'], name: 'paper.index', component: () => import('@/views/customer/school/paper/paper.index.vue') },
+    //         // { path: 'template/index', title: '模板管理', name: 'template.index', component: () => import('@/views/customer/school/template/template.index.vue') },
+    //         // { path: 'quota/index', title: '指标管理', name: 'quota.index', component: () => import('@/views/customer/quota/school/quota.index.vue') },
     //     ]
     // },
     // {
@@ -269,5 +276,6 @@ export const routers = [
     ...appRouter,
     page500,
     page403,
-    page404
+    cDashboard
+    // page404
 ];

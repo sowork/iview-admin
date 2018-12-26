@@ -1,12 +1,19 @@
-import axios from 'axios';
+import axios from '@/libs/axios';
 import semver from 'semver';
 import packjson from '../../package.json';
+import { routerList } from '../router/router.component';
+import { appRouter } from '../router/router';
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import store from '../store';
+import { apiDomain } from '@/libs/const';
+import env from '../../build/env';
 
 let util = {
 
 };
 util.title = function (title) {
-    title = title || 'iView admin';
+    title = title || '弘智云管理平台';
     window.document.title = title;
 };
 
@@ -26,16 +33,6 @@ util.oneOf = function (ele, targetArr) {
     } else {
         return false;
     }
-};
-
-util.isShowRoute = function (allPermissions, currentPermission) {
-    if (typeof currentPermission !== 'object') {
-        currentPermission = [currentPermission];
-    }
-    if (new Set(allPermissions.filter(x => new Set(currentPermission).has(x))).size > 0) {
-        return true;
-    }
-    return false;
 };
 
 util.showThisRoute = function (itAccess, currentAccess) {
@@ -133,48 +130,50 @@ util.setCurrentPath = function (vm, name) {
                 return false;
             }
         })[0];
-        if (currentPathObj.children.length <= 1 && currentPathObj.name === 'home') {
-            currentPathArr = [
-                {
-                    title: '首页',
-                    path: '',
-                    name: 'home_index'
-                }
-            ];
-        } else if (currentPathObj.children.length <= 1 && currentPathObj.name !== 'home') {
-            currentPathArr = [
-                {
-                    title: '首页',
-                    path: '/home',
-                    name: 'home_index'
-                },
-                {
-                    title: currentPathObj.title,
-                    path: '',
-                    name: name
-                }
-            ];
-        } else {
-            let childObj = currentPathObj.children.filter((child) => {
-                return child.name === name;
-            })[0];
-            currentPathArr = [
-                {
-                    title: '首页',
-                    path: '/home',
-                    name: 'home_index'
-                },
-                {
-                    title: currentPathObj.title,
-                    path: '',
-                    name: currentPathObj.name
-                },
-                {
-                    title: childObj.title,
-                    path: currentPathObj.path + '/' + childObj.path,
-                    name: name
-                }
-            ];
+        if (currentPathObj) {
+            if (currentPathObj.children.length <= 1 && currentPathObj.name === 'home') {
+                currentPathArr = [
+                    {
+                        title: '首页',
+                        path: '',
+                        name: 'home_index'
+                    }
+                ];
+            } else if (currentPathObj.children.length <= 1 && currentPathObj.name !== 'home') {
+                currentPathArr = [
+                    {
+                        title: '首页',
+                        path: '/home',
+                        name: 'home_index'
+                    },
+                    {
+                        title: currentPathObj.title,
+                        path: '',
+                        name: name
+                    }
+                ];
+            } else {
+                let childObj = currentPathObj.children.filter((child) => {
+                    return child.name === name;
+                })[0];
+                currentPathArr = [
+                    {
+                        title: '首页',
+                        path: '/home',
+                        name: 'home_index'
+                    },
+                    {
+                        title: currentPathObj.title,
+                        path: '',
+                        name: currentPathObj.name
+                    },
+                    {
+                        title: childObj.title,
+                        path: currentPathObj.path + '/' + childObj.path,
+                        name: name
+                    }
+                ];
+            }
         }
     }
     vm.$store.commit('setCurrentPath', currentPathArr);
@@ -242,11 +241,48 @@ util.toDefaultPage = function (routers, name, route, next) {
     }
 };
 
+util.spliteMenu = function (router = appRouter) {
+    let routers = [];
+    for (let menu of router) {
+        if (menu.children !== undefined && menu.children.length > 0) {
+            let tmpMenu = JSON.parse(JSON.stringify(menu));
+            tmpMenu.children = undefined;
+            routers.push(tmpMenu);
+            routers = routers.concat(util.spliteMenu(menu.children));
+        } else {
+            routers.push(menu);
+        }
+    }
+
+    return routers;
+};
+
 util.fullscreenEvent = function (vm) {
     vm.$store.commit('initCachepage');
-    // 权限菜单过滤相关
-    vm.$store.commit('updateMenulist');
-    // 全屏相关
+};
+
+util.parseGrade = function (date, type = 1) {
+    let year = new Date(date).getFullYear();
+    let currentYear = new Date().getFullYear();
+    if (type === 1) {
+        let diffYear = Number.parseInt(currentYear) - Number.parseInt(year);
+        switch (diffYear) {
+            case 0:
+                return '一年级';
+            case 1:
+                return '二年级';
+            case 2:
+                return '三年级';
+            case 3:
+                return '四年级';
+            case 4:
+                return '五年级';
+            case 5:
+                return '六年级';
+            default:
+                return '已毕业';
+        }
+    }
 };
 
 util.checkUpdate = function (vm) {
@@ -263,5 +299,109 @@ util.checkUpdate = function (vm) {
         }
     });
 };
+
+util.parseMenuTree = function (menus) {
+    if (!menus) {
+        return [];
+    }
+    let tree = [];
+    let temp = new Map();
+    for (let item of menus) {
+        if (item.other_data !== undefined && item.other_data !== '') {
+            let data = JSON.parse(item.other_data);
+            temp.set(item.relation_id, {
+                path: data.path,
+                icon: data.icon,
+                component: routerList[item.item_code],
+                title: item.item_name,
+                parent_id: item.parent_id,
+                relation_id: item.relation_id,
+                name: item.item_code,
+                meta: {target: data.target}
+            });
+        }
+    }
+
+    for (let value of temp.values()) {
+        if (value.parent_id !== null && temp.get(value.parent_id) !== undefined) {
+            if (temp.get(value.parent_id).children === undefined) {
+                temp.get(value.parent_id).children = [];
+            }
+            temp.get(value.parent_id).children.push(value);
+        } else {
+            tree.push(value);
+        }
+    }
+
+    for (let index in tree) {
+        if (tree[index].children === undefined) {
+            tree.splice(index, 1);
+        }
+    }
+
+    return tree;
+};
+
+util.loadMenu = function () {
+    return Promise.all([
+        axios.get('{{auth_host_v1}}/auth/items', {
+            params: {
+                'scope': 'admin_menus,school_menus,org_menus',
+                'type': 2
+            }
+        }),
+        axios.get('{{auth_host_v1}}/auth/items', {
+            params: {
+                'scope': 'admin_top_menus',
+                'type': 2
+            }
+        }),
+        axios.get('{{auth_host_v1}}/auth/items', {
+            params: {
+                'scope': 'admin_permissions,school_permissions',
+                'type': 1
+            }
+        })
+    ]).then(([menus, topMenus, permissions]) => {
+        localStorage.menuList = JSON.stringify(menus.data.data);
+        localStorage.topMenuList = JSON.stringify(topMenus.data.data);
+        localStorage.permissions = JSON.stringify(permissions.data.data);
+        localStorage.allItems = JSON.stringify(menus.data.data.concat(topMenus.data.data, permissions.data.data));
+    });
+};
+
+util.storeMenus = function () {
+    Vue.use(VueRouter);
+    const userMenus = util.parseMenuTree(JSON.parse(localStorage.menuList || null) || []);
+
+    store.state.app.spliteAppMenu = util.spliteMenu(appRouter); // 自定义路由
+    store.state.app.menuList = userMenus.concat(appRouter);
+    store.state.app.routers.push(...userMenus);
+    store.state.app.menuList.map((item) => {
+        let tagsList = [];
+        if (item.children) {
+            if (item.children.length <= 1) {
+                tagsList.push(item.children[0]);
+            } else {
+                tagsList.push(...item.children);
+            }
+            store.commit('setTagsList', tagsList);
+        }
+    });
+
+    return userMenus;
+};
+
+util.parseUrl = function (url) {
+    let reg = /{{([a-zA-Z0-9_.-]+)}}/g;
+    let item = '';
+    while ((item = reg.exec(url)) !== null) {
+        if (item) {
+            let tmp = new RegExp('{{' + item[1] + '}}', 'g');
+            url = url.replace(tmp, apiDomain[env][item[1]]);
+        }
+    }
+    return url;
+}
 
 export default util;
