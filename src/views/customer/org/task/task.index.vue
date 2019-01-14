@@ -57,14 +57,14 @@
                     {{ itemDetail.item.item_name }}
                     <div slot="content">
                         <Row v-for="(record, index) in itemDetail.child_task_detail_record" style="margin: 10px 0px;">
-                            <Col span="6" v-text="'第' + index + 1 + '提交结果'"></Col>
+                            <Col span="6" v-text="'第' + (index + 1) + '提交结果'"></Col>
                             <Col span="18">
                             <Row>
                                 <Col span="6"style="border: 1px solid;" align="middle">代码</Col>
                                 <Col span="6"style="border: 1px solid;" align="middle">值</Col>
                             </Row>
                             <Row v-for="data in record.child_task_detail_data">
-                                <Col span="6" v-text="data.extension_field_id" align="middle" style="border: 1px solid;"></Col>
+                                <Col span="6" v-text="data.field_name.item_field_name" align="middle" style="border: 1px solid;"></Col>
                                 <Col span="6" v-text="data.extension_field_value" align="middle" style="border: 1px solid;"></Col>
                             </Row>
                             </Col>
@@ -117,6 +117,20 @@
                         align: 'center',
                         render: (h, params) => {
                             return h('span', params.row.user.user_name);
+                        }
+                    },
+                    {
+                        title: '任务进度',
+                        align: 'center',
+                        render: (h, params) => {
+                            let total = params.row.task_detail.length;
+                            let finishNum = 0;
+                            for (let detail of params.row.task_detail) {
+                                if (detail.surplus_num === detail.use_num) {
+                                    finishNum++;
+                                }
+                            }
+                            return h('span', total + '/' + finishNum);
                         }
                     },
                     {

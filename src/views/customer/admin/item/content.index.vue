@@ -57,7 +57,7 @@
             </div>
         </Modal>
 
-        <Modal :loading="loading" v-model="modal2" title="指标管理" @keydown.enter.native="httpRequest2.next()" width="600">
+        <Modal :loading="loading" v-model="modal2" title="维度管理" @keydown.enter.native="httpRequest2.next()" width="600">
             <Form ref="formItem2" :model="formItem2" :label-width="80">
                 <FormItem
                         v-for="(item, index) in formItem2.items"
@@ -317,7 +317,7 @@
                                             this.showQuotas(params.row.id);
                                         }
                                     }
-                                }, '指标管理'),
+                                }, '维度管理'),
                                 h('Button', {
                                     props: {
                                         type: 'text',

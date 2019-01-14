@@ -57,49 +57,49 @@
             </div>
         </Modal>
 
-        <Modal :loading="loading" v-model="modal2" title="指标管理" @keydown.enter.native="httpRequest2.next()" width="600">
-            <Form ref="formItem2" :model="formItem2" :label-width="80">
-                <FormItem
-                        v-for="(item, index) in formItem2.items"
-                        :key="index"
-                        :label="'自定义指标' + index">
-                    <Row>
-                        <Col span="6">
-                        <FormItem :prop="'items.' + index + '.item_field_code'" :rules="ruleValidate2.item_field_code">
-                            <Input type="text" v-model="item.item_field_code" placeholder="请输入指标code"></Input>
-                        </FormItem>
-                        </Col>
-                        <Col span="1" style="text-align: center">-</Col>
-                        <Col span="6">
-                        <FormItem :prop="'items.' + index + '.item_field_name'" :rules="ruleValidate2.item_field_name">
-                            <Input type="text" v-model="item.item_field_name" placeholder="请输入指标name"></Input>
-                        </FormItem>
-                        </Col>
-                        <Col span="1" style="text-align: center">-</Col>
-                        <Col span="6">
-                        <FormItem :prop="'items.' + index + '.ref_value'">
-                            <Input type="text" v-model="item.ref_value" placeholder="请输入指标参考值"></Input>
-                        </FormItem>
-                        </Col>
-                        <Col span="4">
-                        <Button type="ghost" @click="handleRemove(index)">删除</Button>
-                        </Col>
-                    </Row>
-                </FormItem>
+        <!--<Modal :loading="loading" v-model="modal2" title="指标管理" @keydown.enter.native="httpRequest2.next()" width="600">-->
+            <!--<Form ref="formItem2" :model="formItem2" :label-width="80">-->
+                <!--<FormItem-->
+                        <!--v-for="(item, index) in formItem2.items"-->
+                        <!--:key="index"-->
+                        <!--:label="'自定义指标' + index">-->
+                    <!--<Row>-->
+                        <!--<Col span="6">-->
+                        <!--<FormItem :prop="'items.' + index + '.item_field_code'" :rules="ruleValidate2.item_field_code">-->
+                            <!--<Input type="text" v-model="item.item_field_code" placeholder="请输入指标code"></Input>-->
+                        <!--</FormItem>-->
+                        <!--</Col>-->
+                        <!--<Col span="1" style="text-align: center">-</Col>-->
+                        <!--<Col span="6">-->
+                        <!--<FormItem :prop="'items.' + index + '.item_field_name'" :rules="ruleValidate2.item_field_name">-->
+                            <!--<Input type="text" v-model="item.item_field_name" placeholder="请输入指标name"></Input>-->
+                        <!--</FormItem>-->
+                        <!--</Col>-->
+                        <!--<Col span="1" style="text-align: center">-</Col>-->
+                        <!--<Col span="6">-->
+                        <!--<FormItem :prop="'items.' + index + '.ref_value'">-->
+                            <!--<Input type="text" v-model="item.ref_value" placeholder="请输入指标参考值"></Input>-->
+                        <!--</FormItem>-->
+                        <!--</Col>-->
+                        <!--<Col span="4">-->
+                        <!--<Button type="ghost" @click="handleRemove(index)">删除</Button>-->
+                        <!--</Col>-->
+                    <!--</Row>-->
+                <!--</FormItem>-->
 
-                <FormItem>
-                    <Row>
-                        <Col span="12">
-                        <Button type="dashed" long @click="handleAdd" icon="plus-round">添加指标</Button>
-                        </Col>
-                    </Row>
-                </FormItem>
-            </Form>
-            <div slot="footer">
-                <Button type="ghost" @click="reset('formItem')">重置</Button>
-                <Button type="primary" @click="httpRequest2.next()">确认</Button>
-            </div>
-        </Modal>
+                <!--<FormItem>-->
+                    <!--<Row>-->
+                        <!--<Col span="12">-->
+                        <!--<Button type="dashed" long @click="handleAdd" icon="plus-round">添加指标</Button>-->
+                        <!--</Col>-->
+                    <!--</Row>-->
+                <!--</FormItem>-->
+            <!--</Form>-->
+            <!--<div slot="footer">-->
+                <!--<Button type="ghost" @click="reset('formItem')">重置</Button>-->
+                <!--<Button type="primary" @click="httpRequest2.next()">确认</Button>-->
+            <!--</div>-->
+        <!--</Modal>-->
 
         <Modal :loading="loading" v-model="modal3" title="模型管理" @keydown.enter.native="httpRequest3.next()" width="820">
             <Select v-model="searchFilter.type" style="width:250px" v-if="showTransfer" placeholder="请选择内容类别">
@@ -260,25 +260,25 @@
                                         }
                                     }
                                 }, '添加项目'),
-                                h('Button', {
-                                    props: {
-                                        type: 'text',
-                                        size: 'small'
-                                    },
-                                    on: {
-                                        click: () => {
-                                            this.httpRequest2 = this.actionModal('formItem2', 'storeQuotas', params.row.id, 'modal2', true);
-                                            this.httpRequest2.next();
-                                            this.formItem2.items = [{
-                                                item_id: params.row.id,
-                                                item_field_code: '',
-                                                item_field_name: '',
-                                                ref_value: ''
-                                            }];
-                                            this.showQuotas(params.row.id);
-                                        }
-                                    }
-                                }, '指标管理'),
+//                                h('Button', {
+//                                    props: {
+//                                        type: 'text',
+//                                        size: 'small'
+//                                    },
+//                                    on: {
+//                                        click: () => {
+//                                            this.httpRequest2 = this.actionModal('formItem2', 'storeQuotas', params.row.id, 'modal2', true);
+//                                            this.httpRequest2.next();
+//                                            this.formItem2.items = [{
+//                                                item_id: params.row.id,
+//                                                item_field_code: '',
+//                                                item_field_name: '',
+//                                                ref_value: ''
+//                                            }];
+//                                            this.showQuotas(params.row.id);
+//                                        }
+//                                    }
+//                                }, '指标管理'),
                                 h('Button', {
                                     props: {
                                         type: 'text',

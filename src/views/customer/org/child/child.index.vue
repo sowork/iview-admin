@@ -161,7 +161,7 @@
                     },
                     {
                         title: '单价（元）',
-                        render: (h, params) => Math.floor(params.row.sale_price / 100)
+                        render: (h, params) => h('span', Math.floor(params.row.sale_price / 100) + '元')
                     },
                     {
                         title: '次数',

@@ -50,7 +50,8 @@
                                 </a>
                                 <DropdownMenu slot="list">
                                     <DropdownItem v-permission="'ownspace_index'" name="ownSpace">个人中心</DropdownItem>
-                                    <DropdownItem name="cDashboard">机构报表</DropdownItem>
+                                    <DropdownItem v-permission="'c.dashboard_index'" name="cDashboard">机构报表</DropdownItem>
+                                    <DropdownItem v-permission="'lin.yi.dashboard'" name="linYiDashboard">临沂机构报表</DropdownItem>
                                     <DropdownItem name="loginout" divided>退出登录</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
@@ -157,6 +158,15 @@
 //                    });
                     const {href} = this.$router.resolve({
                         name: 'cDashboard'
+                    });
+                    window.open(href, '_blank');
+                } else if (name === 'linYiDashboard') {
+//                    util.openNewPage(this, 'cDashboard');
+//                    this.$router.push({
+//                        name: 'cDashboard'
+//                    });
+                    const {href} = this.$router.resolve({
+                        name: 'linYiDashboard'
                     });
                     window.open(href, '_blank');
                 } else if (name === 'loginout') {

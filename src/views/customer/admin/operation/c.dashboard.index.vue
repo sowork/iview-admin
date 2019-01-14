@@ -69,7 +69,7 @@
                     </p>
                     <Row type="flex" justify="space-around">
                         <Col span="7" style="height: 330px; border: 1px solid #40bbd9;">
-                            <chart-line id="line1" :title="line1.title" :label="line1.label" :yAxis="line1.yAxis" :xAxis="line1.xAxis" :series="line1.series"></chart-line>
+                            <chart-line id="line1" :title="line1.title" :grid="line1.grid" :label="line1.label" :yAxis="line1.yAxis" :xAxis="line1.xAxis" :series="line1.series"></chart-line>
                         </Col>
                         <Col span="7" style="border: 1px solid #40bbd9;">
                             <chart-pie id="pie1" :title="pie1.title" :series="pie1.series"></chart-pie>
@@ -272,6 +272,10 @@
                         },
                         borderColor: '#40bbd9',
                         borderWidth: '1'
+                    },
+                    grid: {
+                        bottom: 100,
+                        left: 80
                     },
                     xAxis: {
                         data: [],

@@ -157,7 +157,7 @@
                 <Button type="primary" @click="httpRequest2.next()">确认</Button>
             </div>
         </Modal>
-        <Modal v-model="modal3" title="内容管理" @keydown.enter.native="httpRequest3.next()" width="1000">
+        <Modal v-model="modal3" title="添加课程" @keydown.enter.native="httpRequest3.next()" width="1000">
             <Form ref="formItem3" :model="formItem3" :rules="ruleValidate3" label-position="top">
                 <div v-for="(item, index) in formItem3.items">
                     <Row>
@@ -342,7 +342,7 @@
                                             }
                                         }
                                     }
-                                }, '添加内容'),
+                                }, '添加课程'),
                                 h('Button', {
                                     props: {
                                         type: 'text',

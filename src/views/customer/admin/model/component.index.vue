@@ -191,7 +191,7 @@
                                             this.currentIndexId = params.row.id;
                                         }
                                     }
-                                }, '添加内容'),
+                                }, '模型关联'),
                                 h('Button', {
                                     props: {
                                         type: 'text',

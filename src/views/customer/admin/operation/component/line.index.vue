@@ -16,6 +16,12 @@
             series: {
                 type: Array
             },
+            legend: {
+                type: Object
+            },
+            grid: {
+                type: Object
+            },
             title: {
                 type: Object
             }
@@ -32,6 +38,8 @@
                     xAxis: {...{type: 'category'}, ...this.xAxis},
                     yAxis: {...{type: 'value'}, ...this.yAxis},
                     series: [...this.series],
+                    legend: {...this.legend},
+                    grid: {...this.grid},
                     color: ['#00FF00', '#e99e80', '#b78bc8', '#e5c271', '#8bc56e', '#a4d6ef', '#5d85d4', '#e97b7a']
                 };
             }
